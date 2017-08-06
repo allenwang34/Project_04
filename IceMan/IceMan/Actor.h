@@ -9,8 +9,8 @@
 class Actor : public GraphObject {
 public:
 	Actor(int imageID, int startX, int startY, Direction startDirection, double size, unsigned int depth);
-	~Actor();
-	virtual void doSomething();
+	//~Actor();
+	//virtual void doSomething();
 	
 
 
@@ -21,10 +21,11 @@ private:
 };
 
 
+
 class Ice : public Actor {
 public:
-	Ice ();
-	~Ice();
+	Ice (int startX, int startY);
+	//~Ice();
 
 private:
 
@@ -32,16 +33,18 @@ private:
 
 
 
+
+
 class Iceman :public Actor {
 public:
 	Iceman();
-	~Iceman();
-	void doSomething();
+	//~Iceman();
+	//void doSomething();
 
 private:
 
-	StudentWorld* m_StudentWorld;
-	Ice* m_Ice;
+	//StudentWorld* m_StudentWorld;
+	//Ice* m_Ice;
 	int m_hitPoints;
 	int m_waterAmmo;
 	int m_sonarCharge;

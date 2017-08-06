@@ -6,8 +6,14 @@
 Actor::Actor(int imageID, int startX, int startY, Direction startDirection, double size, unsigned int depth) 
 	: GraphObject(imageID,startX,startY,startDirection,size,depth) {
 	setVisible(true);
+}
+
+
+Ice::Ice(int Startx, int Starty)
+	: Actor(IID_ICE, Startx, Starty, right, 0.25, 3) {
 
 }
+
 
 
 Iceman::Iceman()
