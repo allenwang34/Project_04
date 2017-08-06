@@ -14,6 +14,10 @@ Ice::Ice(int Startx, int Starty)
 
 }
 
+void Ice::doSomething() {
+	return;
+}
+
 
 
 Iceman::Iceman()
@@ -23,5 +27,21 @@ Iceman::Iceman()
 	m_waterAmmo = 5;
 	m_sonarCharge = 1;
 	m_goldNuggest = 0;
+	m_needRemoveIce = false;
 	
+}
+
+
+
+void Iceman::doSomething() {
+	
+	if (m_studentWorld->isCoveredByIce(getX(), getY()))
+		m_needRemoveIce = true;
+	else
+		m_needRemoveIce = false;
+
+}
+
+bool Iceman::isRemoveIce() {
+	return m_needRemoveIce;
 }

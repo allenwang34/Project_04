@@ -3,14 +3,14 @@
 
 #include "GraphObject.h"
 
-
+class StudentWorld;
 // Students:  Add code to this file, Actor.cpp, StudentWorld.h, and StudentWorld.cpp
 
 class Actor : public GraphObject {
 public:
 	Actor(int imageID, int startX, int startY, Direction startDirection, double size, unsigned int depth);
 	//~Actor();
-	//virtual void doSomething();
+	virtual void doSomething()=0;
 	
 
 
@@ -25,6 +25,7 @@ private:
 class Ice : public Actor {
 public:
 	Ice (int startX, int startY);
+	void doSomething();
 	//~Ice();
 
 private:
@@ -32,24 +33,19 @@ private:
 };
 
 
-
-
-
 class Iceman :public Actor {
 public:
 	Iceman();
 	//~Iceman();
-	//void doSomething();
-
+	void doSomething();
+	bool isRemoveIce();
 private:
-
-	//StudentWorld* m_StudentWorld;
-	//Ice* m_Ice;
 	int m_hitPoints;
 	int m_waterAmmo;
 	int m_sonarCharge;
 	int m_goldNuggest;
-	
+	StudentWorld* m_studentWorld;
+	bool m_needRemoveIce;
 
 
 };
