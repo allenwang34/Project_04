@@ -8,6 +8,7 @@ Actor::Actor(int imageID, int startX, int startY, Direction startDirection, doub
 	setVisible(true);
 }
 
+Actor::~Actor() {}
 
 Ice::Ice(int Startx, int Starty)
 	: Actor(IID_ICE, Startx, Starty, right, 0.25, 3) {
@@ -16,6 +17,8 @@ Ice::Ice(int Startx, int Starty)
 void Ice::doSomething() {
 	return;
 }
+
+Ice::~Ice() {}
 
 
 
@@ -39,29 +42,45 @@ void Iceman::doSomething() {
 		switch (i)
 		{
 		case KEY_PRESS_UP:
-			if (getDirection() == up)
-				moveTo(getX(), getY() + 1);
+			if (getDirection() == up) {
+				if (getY() + 1 > 59)
+					moveTo(getX(), getY());
+				else
+					moveTo(getX(), getY() + 1);
+			}
 			else
 				setDirection(up);
 			break;
 
 		case KEY_PRESS_DOWN:
-			if (getDirection() == down)
-				moveTo(getX(), getY() - 1);
+			if (getDirection() == down) {
+				if (getY() - 1 < 0)
+					moveTo(getX(), getY());
+				else
+					moveTo(getX(), getY() - 1);
+			}
 			else
 				setDirection(down);
 			break;
 			
 		case KEY_PRESS_LEFT:
-			if (getDirection() == left)
-				moveTo(getX() - 1, getY());
+			if (getDirection() == left) {
+				if (getX() - 1 < 0)
+					moveTo(getX(), getY());
+				else
+					moveTo(getX() - 1, getY());
+			}
 			else
 				setDirection(left);
 			break;
 
 		case KEY_PRESS_RIGHT:
-			if (getDirection() == right)
-				moveTo(getX() + 1, getY());
+			if (getDirection() == right) {
+				if (getX()+1>60)
+					moveTo(getX(), getY());
+				else
+					moveTo(getX() + 1, getY());
+			}
 			else
 				setDirection(right);
 			break;
@@ -77,5 +96,12 @@ void Iceman::doSomething() {
 	else
 		m_needRemoveIce = false;
 	
+}
+
+Iceman::~Iceman() {
+	int m_hitPoints = 0;
+	int m_waterAmmo = 0;
+	int m_sonarCharge = 0;
+	int m_goldNuggest = 0;
 }
 

@@ -3,6 +3,7 @@
 
 #include "GameWorld.h"
 #include "GameConstants.h"
+#include "GameController.h"
 #include "Actor.h"
 #include <string>
 #include <list>
@@ -13,20 +14,14 @@
 class StudentWorld : public GameWorld
 {
 public:
-	StudentWorld(std::string assetDir)
-		:GameWorld(assetDir) { 
-	}
-		
+	StudentWorld(std::string assetDir);
+	virtual ~StudentWorld();
 	virtual int init();
-	
-
 	virtual int move();
-
-	virtual void cleanUp() { }
-
+	virtual void cleanUp();
 	bool isCoveredByIce(const int x,const int y);
-
 	void removeIce(const int x,const int y);
+
 
 private:
 
@@ -35,6 +30,10 @@ private:
 	Ice* m_oilField[63][59];
 	Iceman* m_iceman;
 	std::list<Actor*> gameObjects;
+	int m_levelCount;
+	int m_lives;
+	int m_oilLeft;
+	int m_score;
 	
 	
 

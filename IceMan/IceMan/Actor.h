@@ -11,7 +11,7 @@ class StudentWorld;
 class Actor : public GraphObject {
 public:
 	Actor(int imageID, int startX, int startY, Direction startDirection, double size, unsigned int depth);
-	//~Actor();
+	virtual ~Actor();
 	virtual void doSomething()=0;
 	StudentWorld* getWorld() {
 		return m_studentWorld;
@@ -32,7 +32,7 @@ class Ice : public Actor {
 public:
 	Ice (int startX, int startY);
 	void doSomething();
-	//~Ice();
+	~Ice();
 
 private:
 
@@ -42,11 +42,16 @@ private:
 class Iceman :public Actor {
 public:
 	Iceman();
-	//~Iceman();
+	~Iceman();
 	void doSomething();
 	bool isRemoveIce() {
 		return m_needRemoveIce;
 	}
+	int GetWaterAmount() { return m_waterAmmo; }
+	int GetHealth() { return m_hitPoints * 10; }
+	int GetGold() { return m_goldNuggest; }
+	int GetSonar() { return m_sonarCharge; }
+
 
 
 private:
