@@ -3,6 +3,7 @@
 
 #include "GraphObject.h"
 
+
 class StudentWorld;
 // Students:  Add code to this file, Actor.cpp, StudentWorld.h, and StudentWorld.cpp
 
@@ -14,6 +15,9 @@ public:
 	virtual void doSomething()=0;
 	StudentWorld* getWorld() {
 		return m_studentWorld;
+	}
+	void setWorld(StudentWorld* studentWorld) {
+		this->m_studentWorld = studentWorld;
 	}
 
 
@@ -51,6 +55,8 @@ private:
 	int m_sonarCharge;
 	int m_goldNuggest;
 	bool m_needRemoveIce;
+	
+	
 	
 
 };

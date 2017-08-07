@@ -11,7 +11,6 @@ Actor::Actor(int imageID, int startX, int startY, Direction startDirection, doub
 
 Ice::Ice(int Startx, int Starty)
 	: Actor(IID_ICE, Startx, Starty, right, 0.25, 3) {
-
 }
 
 void Ice::doSomething() {
@@ -35,10 +34,9 @@ Iceman::Iceman()
 void Iceman::doSomething() {
 
 
-	int ch;
-	if (getWorld()->getKey(ch)) {
-
-		switch (ch)
+	int i;
+	if (getWorld()->getKey(i)) {
+		switch (i)
 		{
 		case KEY_PRESS_UP:
 			if (getDirection() == up)
@@ -74,7 +72,6 @@ void Iceman::doSomething() {
 	}
 
 
-	
 	if (getWorld()->isCoveredByIce(getX(), getY()))
 		m_needRemoveIce = true;
 	else

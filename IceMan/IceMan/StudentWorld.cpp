@@ -15,20 +15,30 @@ int StudentWorld::init()
 {
 
 	for (int x = 0; x < oilFieldX; x++) { //create the oil field covered by ice
+		
+	
 		if (x < 30 || x > 33) {
 			for (int y = 0; y < oilFieldY; y++) {
 				Ice *newIce = new Ice(x, y);
 				m_oilField[x][y] = newIce;
 			}
 		}
-		else {
-			for (int y = 0; y < 4; y++) {
-				Ice *newIce = new Ice(x, y);
-				m_oilField[x][y] = newIce;
+
+		else  {
+			for (int y = 0; y < oilFieldY; y++) {
+				if (y >= 0 && y < 4) {
+					Ice *newIce = new Ice(x, y);
+					m_oilField[x][y] = newIce;
+				}
+				else
+					m_oilField[x][y] = nullptr;
 			}
 		}
+
+		
 	}
 	m_iceman = new Iceman();
+	m_iceman->setWorld(this);
 
 
 
@@ -70,9 +80,9 @@ void StudentWorld::removeIce(const int x,const int y) {
 	for (int i = x; i < std::min(x+3, 63); i++) {
 		for (int j = y; j < std::min(y+3, 59); j++) {
 			if (m_oilField[i][j] != nullptr) {
-				Ice* temp = m_oilField[i][j];
-				m_oilField[i][j] = nullptr;
-				delete temp;
+				//Ice* temp = m_oilField[i][j];
+				m_oilField[i][j]->setVisible(false);
+				//delete temp;
 			}
 		}
 	}
