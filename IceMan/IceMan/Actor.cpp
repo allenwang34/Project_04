@@ -32,16 +32,53 @@ Iceman::Iceman()
 }
 
 
-
 void Iceman::doSomething() {
+
+
+	int ch;
+	if (getWorld()->getKey(ch)) {
+
+		switch (ch)
+		{
+		case KEY_PRESS_UP:
+			if (getDirection() == up)
+				moveTo(getX(), getY() + 1);
+			else
+				setDirection(up);
+			break;
+
+		case KEY_PRESS_DOWN:
+			if (getDirection() == down)
+				moveTo(getX(), getY() - 1);
+			else
+				setDirection(down);
+			break;
+			
+		case KEY_PRESS_LEFT:
+			if (getDirection() == left)
+				moveTo(getX() - 1, getY());
+			else
+				setDirection(left);
+			break;
+
+		case KEY_PRESS_RIGHT:
+			if (getDirection() == right)
+				moveTo(getX() + 1, getY());
+			else
+				setDirection(right);
+			break;
+
+		default:
+			break;
+		}
+	}
+
+
 	
-	if (m_studentWorld->isCoveredByIce(getX(), getY()))
+	if (getWorld()->isCoveredByIce(getX(), getY()))
 		m_needRemoveIce = true;
 	else
 		m_needRemoveIce = false;
-
+	
 }
 
-bool Iceman::isRemoveIce() {
-	return m_needRemoveIce;
-}
