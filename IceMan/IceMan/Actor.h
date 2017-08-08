@@ -13,16 +13,20 @@ public:
 	Actor(int imageID, int startX, int startY, Direction startDirection, double size, unsigned int depth);
 	virtual ~Actor();
 	virtual void doSomething()=0;
-	StudentWorld* getWorld() {
-		return m_studentWorld;
-	}
-	void setWorld(StudentWorld* studentWorld) {
-		this->m_studentWorld = studentWorld;
-	}
+	virtual void getAnnoyed() { return; }
+	StudentWorld* getWorld() { return m_studentWorld; }
+	void setWorld(StudentWorld* studentWorld) { this->m_studentWorld = studentWorld; }
+	void setIsAnnoyed(bool annoyedOrNot) { isAnnoyed = annoyedOrNot; }
+	bool getIsAnnoyed() { return isAnnoyed; }
+
+	void setAlive(bool aliveOrNot) { isAlive = aliveOrNot; }
+	bool getAlive() { return isAlive; }
 
 
 private:
 	StudentWorld* m_studentWorld;
+	bool isAlive;
+	bool isAnnoyed;
 
 };
 
@@ -44,13 +48,14 @@ public:
 	Iceman();
 	~Iceman();
 	void doSomething();
+	void getAnnoyed();
 	bool isRemoveIce() {
 		return m_needRemoveIce;
 	}
-	int GetWaterAmount() { return m_waterAmmo; }
-	int GetHealth() { return m_hitPoints * 10; }
-	int GetGold() { return m_goldNuggest; }
-	int GetSonar() { return m_sonarCharge; }
+	int GetWaterAmount() const { return m_waterAmmo; } 
+	int GetHealth() const { return m_hitPoints * 10; }
+	int GetGold() const { return m_goldNuggest; }
+	int GetSonar() const { return m_sonarCharge; }
 
 
 
@@ -60,10 +65,6 @@ private:
 	int m_sonarCharge;
 	int m_goldNuggest;
 	bool m_needRemoveIce;
-	
-	
-	
-
 };
 
 

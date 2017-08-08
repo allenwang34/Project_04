@@ -14,10 +14,8 @@ GameWorld* createStudentWorld(string assetDir)
 
 StudentWorld::StudentWorld(std::string assetDir)
 	:GameWorld(assetDir) {
-	m_levelCount = 1;
-	m_lives = 3;
-	m_oilLeft = 1;
-	m_score = 0;
+	m_oilLeft = 3;
+	
 }
 
 
@@ -35,15 +33,12 @@ int StudentWorld::init()
 {
 
 	for (int x = 0; x < oilFieldX; x++) { //create the oil field covered by ice
-		
-	
 		if (x < 30 || x > 33) {
 			for (int y = 0; y < oilFieldY; y++) {
 				Ice *newIce = new Ice(x, y);
 				m_oilField[x][y] = newIce;
 			}
 		}
-
 		else  {
 			for (int y = 0; y < oilFieldY; y++) {
 				if (y >= 0 && y < 4) {
@@ -54,18 +49,13 @@ int StudentWorld::init()
 					m_oilField[x][y] = nullptr;
 			}
 		}
-
-		
 	}
 	m_iceman = new Iceman();
 	m_iceman->setWorld(this);
-	setGameStatText("Level: " + std::to_string(m_levelCount) + " Lives: " + std::to_string(m_lives) + " Hlth: " 
+	setGameStatText("Level: " + std::to_string(getLevel()) + " Lives: " + std::to_string(getLives()) + " Hlth: " 
 		+ std::to_string(m_iceman->GetHealth()) +"%" + " Wtr: " + std::to_string(m_iceman->GetWaterAmount())
 		+ " Gld: " + std::to_string(m_iceman->GetGold()) + " Oil Left: " + std::to_string(m_oilLeft) + " Sonar: " 
-		+ std::to_string(m_iceman->GetSonar()) + " Score: " + std::to_string(m_score));
-
-	
-
+		+ std::to_string(m_iceman->GetSonar()) + " Score: " + std::to_string(getScore()));
 	return GWSTATUS_CONTINUE_GAME;
 }
 
@@ -76,24 +66,29 @@ int StudentWorld::move()
 	// Notice that the return value GWSTATUS_PLAYER_DIED will cause our framework to end the current level.
 	//decLives();
 	//return GWSTATUS_PLAYER_DIED;
-	//GameController::getInstance().playSound(SOUND_NONE);
+
+	setGameStatText("Level: " + std::to_string(getLevel()) + " Lives: " + std::to_string(getLives()) + " Hlth: "
+		+ std::to_string(m_iceman->GetHealth()) + "%" + " Wtr: " + std::to_string(m_iceman->GetWaterAmount())
+		+ " Gld: " + std::to_string(m_iceman->GetGold()) + " Oil Left: " + std::to_string(m_oilLeft) + " Sonar: "
+		+ std::to_string(m_iceman->GetSonar()) + " Score: " + std::to_string(getScore()));
+
 	m_iceman->doSomething();
 
 	if (m_iceman->isRemoveIce()) {
 		removeIce(m_iceman->getX(), m_iceman->getY());
 	}
-
+	
 	return GWSTATUS_CONTINUE_GAME;
 }
 
 
 
 bool StudentWorld::isCoveredByIce(const int x,const int y) {
-	if (x >= 63 || y >= 59)
+	if (y >= 59)
 		return false;
-	for (int i = x; i < std::min(x + 3, 63);i++) {
-		for (int j = y; j < std::min(y + 3, 59); j++) {
-			if (m_oilField[i][j] != nullptr)
+	for (int i = x; i < std::min(x + 4, 63);i++) {
+		for (int j = y; j < std::min(y + 4, 59); j++) {
+			if (m_oilField[i][j] != nullptr && m_oilField[i][j]->isVisible() != false)
 				return true;
 		}
 	}
@@ -103,13 +98,10 @@ bool StudentWorld::isCoveredByIce(const int x,const int y) {
 
 
 void StudentWorld::removeIce(const int x,const int y) {
-	for (int i = x; i < std::min(x+3, 63); i++) {
-		for (int j = y; j < std::min(y+3, 59); j++) {
+	for (int i = x; i < std::min(x+4, 63); i++) {
+		for (int j = y; j < std::min(y+4, 59); j++) {
 			if (m_oilField[i][j] != nullptr) {
 				m_oilField[i][j]->setVisible(false);
-				//GameController::getInstance().playSound(SOUND_DIG);
-				//GameController::getInstance().playSound(SOUND_NONE);
-			
 			}
 		}
 	}

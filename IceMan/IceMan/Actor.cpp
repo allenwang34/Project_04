@@ -1,22 +1,26 @@
 #include "Actor.h"
 #include "StudentWorld.h"
+#include "GameController.h"
 
 // Students:  Add code to this file (if you wish), Actor.h, StudentWorld.h, and StudentWorld.cpp
 
 Actor::Actor(int imageID, int startX, int startY, Direction startDirection, double size, unsigned int depth) 
 	: GraphObject(imageID,startX,startY,startDirection,size,depth) {
-	setVisible(true);
+	setAlive(true);
+	setIsAnnoyed(false);
 }
 
 Actor::~Actor() {}
 
 Ice::Ice(int Startx, int Starty)
 	: Actor(IID_ICE, Startx, Starty, right, 0.25, 3) {
+	setVisible(true);
 }
 
 void Ice::doSomething() {
 	return;
 }
+
 
 Ice::~Ice() {}
 
@@ -25,6 +29,7 @@ Ice::~Ice() {}
 Iceman::Iceman()
 	: Actor(IID_PLAYER,30,60,right,1.0,0) {
 	
+	setVisible(true);
 	m_hitPoints = 10;
 	m_waterAmmo = 5;
 	m_sonarCharge = 1;
@@ -91,17 +96,18 @@ void Iceman::doSomething() {
 	}
 
 
-	if (getWorld()->isCoveredByIce(getX(), getY()))
+	if (getWorld()->isCoveredByIce(getX(), getY())) {
 		m_needRemoveIce = true;
+		GameController::getInstance().playSound(SOUND_DIG);
+	}
+
 	else
 		m_needRemoveIce = false;
 	
 }
 
-Iceman::~Iceman() {
-	int m_hitPoints = 0;
-	int m_waterAmmo = 0;
-	int m_sonarCharge = 0;
-	int m_goldNuggest = 0;
-}
+
+void Iceman::getAnnoyed() { return; }
+
+Iceman::~Iceman() { }
 
