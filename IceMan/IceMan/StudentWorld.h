@@ -5,7 +5,7 @@
 #include "GameConstants.h"
 #include "Actor.h"
 #include <string>
-#include <list>
+
 
 
 // Students:  Add code to this file, StudentWorld.cpp, Actor.h, and Actor.cpp
@@ -20,7 +20,6 @@ public:
 	virtual void cleanUp();
 	bool isCoveredByIce(const int x,const int y);
 	void removeIce(const int x,const int y);
-
 
 private:
 

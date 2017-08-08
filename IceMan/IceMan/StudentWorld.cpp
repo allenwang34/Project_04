@@ -14,7 +14,7 @@ GameWorld* createStudentWorld(string assetDir)
 
 StudentWorld::StudentWorld(std::string assetDir)
 	:GameWorld(assetDir) {
-	m_oilLeft = 3;
+	m_oilLeft = 0;
 	
 }
 

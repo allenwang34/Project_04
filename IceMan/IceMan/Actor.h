@@ -58,7 +58,6 @@ public:
 	int GetSonar() const { return m_sonarCharge; }
 
 
-
 private:
 	int m_hitPoints;
 	int m_waterAmmo;

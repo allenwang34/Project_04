@@ -6,6 +6,7 @@
 
 Actor::Actor(int imageID, int startX, int startY, Direction startDirection, double size, unsigned int depth) 
 	: GraphObject(imageID,startX,startY,startDirection,size,depth) {
+	setVisible(true);
 	setAlive(true);
 	setIsAnnoyed(false);
 }
@@ -14,22 +15,17 @@ Actor::~Actor() {}
 
 Ice::Ice(int Startx, int Starty)
 	: Actor(IID_ICE, Startx, Starty, right, 0.25, 3) {
-	setVisible(true);
 }
 
 void Ice::doSomething() {
 	return;
 }
 
-
 Ice::~Ice() {}
-
-
 
 Iceman::Iceman()
 	: Actor(IID_PLAYER,30,60,right,1.0,0) {
 	
-	setVisible(true);
 	m_hitPoints = 10;
 	m_waterAmmo = 5;
 	m_sonarCharge = 1;
@@ -38,9 +34,7 @@ Iceman::Iceman()
 	
 }
 
-
 void Iceman::doSomething() {
-
 
 	int i;
 	if (getWorld()->getKey(i)) {
@@ -95,7 +89,6 @@ void Iceman::doSomething() {
 		}
 	}
 
-
 	if (getWorld()->isCoveredByIce(getX(), getY())) {
 		m_needRemoveIce = true;
 		GameController::getInstance().playSound(SOUND_DIG);
@@ -105,7 +98,6 @@ void Iceman::doSomething() {
 		m_needRemoveIce = false;
 	
 }
-
 
 void Iceman::getAnnoyed() { return; }
 
