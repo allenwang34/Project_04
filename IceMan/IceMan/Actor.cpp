@@ -43,7 +43,9 @@ void Iceman::doSomething() {
 		{
 		case KEY_PRESS_UP:
 			if (getDirection() == up) {
-				if (getY() + 1 > 59)
+				if (getY() + 1 > 60)
+					moveTo(getX(), getY());
+				else if (getWorld()->isBoulderAhead(getX(),getY()+1))
 					moveTo(getX(), getY());
 				else
 					moveTo(getX(), getY() + 1);
@@ -56,6 +58,8 @@ void Iceman::doSomething() {
 			if (getDirection() == down) {
 				if (getY() - 1 < 0)
 					moveTo(getX(), getY());
+				else if (getWorld()->isBoulderAhead(getX(), getY()-1))
+					moveTo(getX(), getY());
 				else
 					moveTo(getX(), getY() - 1);
 			}
@@ -67,6 +71,8 @@ void Iceman::doSomething() {
 			if (getDirection() == left) {
 				if (getX() - 1 < 0)
 					moveTo(getX(), getY());
+				else if (getWorld()->isBoulderAhead(getX()-1, getY()))
+					moveTo(getX(), getY());
 				else
 					moveTo(getX() - 1, getY());
 			}
@@ -76,7 +82,9 @@ void Iceman::doSomething() {
 
 		case KEY_PRESS_RIGHT:
 			if (getDirection() == right) {
-				if (getX()+1>60)
+				if (getX()+1>61)
+					moveTo(getX(), getY());
+				else if (getWorld()->isBoulderAhead(getX()+1, getY()))
 					moveTo(getX(), getY());
 				else
 					moveTo(getX() + 1, getY());

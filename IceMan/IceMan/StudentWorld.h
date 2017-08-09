@@ -6,6 +6,7 @@
 #include "Actor.h"
 #include <string>
 #include <list>
+#include <vector>
 
 
 
@@ -21,13 +22,14 @@ public:
 	virtual void cleanUp();
 	bool isCoveredByIce(const int x,const int y);
 	void removeIce(const int x,const int y);
+	bool isBoulderAhead(const int x, const int y);
 	
 
 private:
 
-	const int oilFieldX = 63;
-	const int oilFieldY = 59;
-	Ice* m_oilField[63][59];
+	const int oilFieldX = 64;
+	const int oilFieldY = 60;
+	Ice* m_oilField[64][60];
 	Iceman* m_iceman;
 	int m_currentLevel;
 	int m_oilNum;

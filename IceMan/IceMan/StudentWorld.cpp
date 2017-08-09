@@ -71,6 +71,7 @@ int StudentWorld::init()
 		if (m_gameObjectList.empty()) { //if the object list is empty, just create game object at random position
 			int randX = getRandNum(0, 60);
 			int randY = getRandNum(20, 56);
+			removeIce(randX, randY);
 			Boulder* newBoulder = new Boulder(randX, randY);
 			m_gameObjectList.push_back(newBoulder);
 		}
@@ -91,6 +92,10 @@ int StudentWorld::init()
 			//after thi while loop, the x and y value are valid to use
 			Boulder* newBoulder = new Boulder(randX, randY); //create game object at x and y
 			m_gameObjectList.push_back(newBoulder);
+			removeIce(randX, randY);
+
+		
+
 		}
 	}
 
@@ -135,8 +140,8 @@ int StudentWorld::move()
 bool StudentWorld::isCoveredByIce(const int x,const int y) {
 	if (y >= 59)
 		return false;
-	for (int i = x; i < std::min(x + 4, 63);i++) {
-		for (int j = y; j < std::min(y + 4, 59); j++) {
+	for (int i = x; i < std::min(x + 4, 64);i++) {
+		for (int j = y; j < std::min(y + 4, 60); j++) {
 			if (m_oilField[i][j] != nullptr && m_oilField[i][j]->isVisible() != false)
 				return true;
 		}
@@ -147,8 +152,8 @@ bool StudentWorld::isCoveredByIce(const int x,const int y) {
 
 
 void StudentWorld::removeIce(const int x,const int y) {
-	for (int i = x; i < std::min(x+4, 63); i++) {
-		for (int j = y; j < std::min(y+4, 59); j++) {
+	for (int i = x; i < std::min(x+4, 64); i++) {
+		for (int j = y; j < std::min(y+4, 60); j++) {
 			if (m_oilField[i][j] != nullptr) {
 				m_oilField[i][j]->setVisible(false);
 				increaseScore(1);
@@ -189,4 +194,22 @@ int StudentWorld::getRandNum(int min, int max) { //from https://stackoverflow.co
 void StudentWorld::regenRandNum(int &X, int&Y, int Xmin, int Xmax, int Ymin, int Ymax) {
 	X = getRandNum(Xmin, Xmax);
 	Y = getRandNum(Ymin, Ymax);
+}
+
+bool StudentWorld::isBoulderAhead(const int x, const int y) {
+
+	list<Actor*>::iterator it = m_gameObjectList.begin();
+	for (int i = 0; i < m_boulderNum; i++) {
+		int boulderX = (*it)->getX();
+		int boulderY = (*it)->getY();
+		for (int i = x; i < std::min(x + 4, 64); i++) {
+			for (int j = y; j < std::min(y + 4, 60); j++) {
+				if (x >= boulderX-2 && x <= boulderX + 2 && y >= boulderY-2 && y <= boulderY + 2)
+					return true;
+			}
+		}
+		it++;
+	}
+	return false;
+
 }
