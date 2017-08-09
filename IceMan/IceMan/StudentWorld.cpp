@@ -77,7 +77,8 @@ int StudentWorld::move()
 	if (m_iceman->isRemoveIce()) {
 		removeIce(m_iceman->getX(), m_iceman->getY());
 	}
-	
+
+
 	return GWSTATUS_CONTINUE_GAME;
 }
 

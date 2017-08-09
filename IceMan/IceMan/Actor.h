@@ -35,11 +35,8 @@ private:
 class Ice : public Actor {
 public:
 	Ice (int startX, int startY);
-	void doSomething();
+	virtual void doSomething();
 	~Ice();
-
-private:
-
 };
 
 
@@ -47,11 +44,9 @@ class Iceman :public Actor {
 public:
 	Iceman();
 	~Iceman();
-	void doSomething();
-	void getAnnoyed();
-	bool isRemoveIce() {
-		return m_needRemoveIce;
-	}
+	virtual void doSomething();
+	virtual void getAnnoyed();
+	bool isRemoveIce() { return m_needRemoveIce; }
 	int GetWaterAmount() const { return m_waterAmmo; } 
 	int GetHealth() const { return m_hitPoints * 10; }
 	int GetGold() const { return m_goldNuggest; }
