@@ -2,6 +2,8 @@
 #include "Actor.h"
 #include <string>
 #include <algorithm>
+#include <random>
+#include <math.h>
 using namespace std;
 
 GameWorld* createStudentWorld(string assetDir)
@@ -13,10 +15,7 @@ GameWorld* createStudentWorld(string assetDir)
 
 
 StudentWorld::StudentWorld(std::string assetDir)
-	:GameWorld(assetDir) {
-	m_oilLeft = 0;
-	
-}
+	:GameWorld(assetDir) { }
 
 
 StudentWorld::~StudentWorld() {
@@ -27,10 +26,21 @@ StudentWorld::~StudentWorld() {
 				delete m_oilField[x][y];
 		}
 	}
+	list<Actor*>::iterator it = m_gameObjectList.begin();
+	while (it != m_gameObjectList.end()) {
+		delete *it;
+		it = m_gameObjectList.erase(it);
+	}
 }
 
 int StudentWorld::init()
 {
+	
+	m_currentLevel = getLevel();
+	m_oilNum = std::min(2 + m_currentLevel, 21);
+	m_boulderNum = std::min(m_currentLevel / 2 + 2, 9);
+	m_goldNum = std::max(5 - m_currentLevel / 2, 2);
+
 
 	for (int x = 0; x < oilFieldX; x++) { //create the oil field covered by ice
 		if (x < 30 || x > 33) {
@@ -50,11 +60,46 @@ int StudentWorld::init()
 			}
 		}
 	}
-	m_iceman = new Iceman();
+
+
+
+	m_iceman = new Iceman(); // create Iceman
 	m_iceman->setWorld(this);
+
+	for (int i = 0; i < m_boulderNum; i++) {
+		
+		if (m_gameObjectList.empty()) { //if the object list is empty, just create game object at random position
+			int randX = getRandNum(0, 60);
+			int randY = getRandNum(20, 56);
+			Boulder* newBoulder = new Boulder(randX, randY);
+			m_gameObjectList.push_back(newBoulder);
+		}
+		else { //if the game object is not empty
+			list<Actor*>::iterator it = m_gameObjectList.begin();
+			int randX = getRandNum(0, 60); //get random x and random y value
+			int randY = getRandNum(20, 56);
+			while (it != m_gameObjectList.end()) { // compare the distance with every element in the list
+				int objectX = (*it)->getX();
+				int objectY = (*it)->getY();
+				double distance = sqrt(pow((objectX - randX), 2) + pow((objectY - randY), 2));
+				if (distance < 6) { //if the distance is within 6 
+					regenRandNum(randX, randY, 0, 60, 20, 56); //re-generate x and y 
+					it = m_gameObjectList.begin(); //compare the entire list again 
+				}
+				it++; //keep comparing the next element in the list
+			}
+			//after thi while loop, the x and y value are valid to use
+			Boulder* newBoulder = new Boulder(randX, randY); //create game object at x and y
+			m_gameObjectList.push_back(newBoulder);
+		}
+	}
+
+
+
+
 	setGameStatText("Level: " + std::to_string(getLevel()) + " Lives: " + std::to_string(getLives()) + " Hlth: " 
 		+ std::to_string(m_iceman->GetHealth()) +"%" + " Wtr: " + std::to_string(m_iceman->GetWaterAmount())
-		+ " Gld: " + std::to_string(m_iceman->GetGold()) + " Oil Left: " + std::to_string(m_oilLeft) + " Sonar: " 
+		+ " Gld: " + std::to_string(m_iceman->GetGold()) + " Oil Left: " + std::to_string(m_oilNum) + " Sonar: " 
 		+ std::to_string(m_iceman->GetSonar()) + " Score: " + std::to_string(getScore()));
 	return GWSTATUS_CONTINUE_GAME;
 }
@@ -69,7 +114,7 @@ int StudentWorld::move()
 
 	setGameStatText("Level: " + std::to_string(getLevel()) + " Lives: " + std::to_string(getLives()) + " Hlth: "
 		+ std::to_string(m_iceman->GetHealth()) + "%" + " Wtr: " + std::to_string(m_iceman->GetWaterAmount())
-		+ " Gld: " + std::to_string(m_iceman->GetGold()) + " Oil Left: " + std::to_string(m_oilLeft) + " Sonar: "
+		+ " Gld: " + std::to_string(m_iceman->GetGold()) + " Oil Left: " + std::to_string(m_oilNum) + " Sonar: "
 		+ std::to_string(m_iceman->GetSonar()) + " Score: " + std::to_string(getScore()));
 
 	m_iceman->doSomething();
@@ -77,7 +122,10 @@ int StudentWorld::move()
 	if (m_iceman->isRemoveIce()) {
 		removeIce(m_iceman->getX(), m_iceman->getY());
 	}
-
+	if (getScore() > 1000) {
+		increaseScore(-1000);
+		return GWSTATUS_FINISHED_LEVEL;
+	}
 
 	return GWSTATUS_CONTINUE_GAME;
 }
@@ -103,6 +151,7 @@ void StudentWorld::removeIce(const int x,const int y) {
 		for (int j = y; j < std::min(y+4, 59); j++) {
 			if (m_oilField[i][j] != nullptr) {
 				m_oilField[i][j]->setVisible(false);
+				increaseScore(1);
 			}
 		}
 	}
@@ -119,4 +168,25 @@ void StudentWorld::cleanUp() {
 				delete m_oilField[x][y];
 		}
 	}
+	list<Actor*>::iterator it = m_gameObjectList.begin();
+	while (it != m_gameObjectList.end()) {
+			delete *it;
+			it = m_gameObjectList.erase(it);
+	}
+}
+
+
+int StudentWorld::getRandNum(int min, int max) { //from https://stackoverflow.com/questions/5008804/generating-random-integer-from-a-range
+	std::random_device rd;     // only used once to initialise (seed) engine
+	std::mt19937 rng(rd());    // random-number engine used (Mersenne-Twister in this case)
+	std::uniform_int_distribution<int> uni(min, max); // guaranteed unbiased
+
+	int random_integer = uni(rng);
+	return random_integer;
+}
+
+
+void StudentWorld::regenRandNum(int &X, int&Y, int Xmin, int Xmax, int Ymin, int Ymax) {
+	X = getRandNum(Xmin, Xmax);
+	Y = getRandNum(Ymin, Ymax);
 }

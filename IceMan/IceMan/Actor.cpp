@@ -33,6 +33,10 @@ Iceman::Iceman()
 
 void Iceman::doSomething() {
 
+	if (!getAlive())
+		return;
+
+
 	int i;
 	if (getWorld()->getKey(i)) {
 		switch (i)
@@ -100,3 +104,13 @@ void Iceman::getAnnoyed() { return; }
 
 Iceman::~Iceman() { }
 
+Boulder::Boulder(int startX, int startY) 
+	: Actor(IID_BOULDER, startX, startY, down, 1, 1) { }
+
+Boulder::~Boulder() {}
+
+void Boulder::doSomething() {
+	if (!getAlive())
+		return;
+	return;
+}

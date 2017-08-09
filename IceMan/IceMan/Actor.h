@@ -61,6 +61,21 @@ private:
 };
 
 
+class Boulder 
+	: public Actor {
+
+public:
+	Boulder(int startX, int startY);
+	~Boulder();
+	virtual void doSomething();
+
+private:
+
+
+
+};
+
+
 
 
 
