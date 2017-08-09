@@ -17,9 +17,6 @@ Ice::Ice(int Startx, int Starty)
 	: Actor(IID_ICE, Startx, Starty, right, 0.25, 3) {
 }
 
-void Ice::doSomething() {
-	return;
-}
 
 Ice::~Ice() {}
 

@@ -12,7 +12,7 @@ class Actor : public GraphObject {
 public:
 	Actor(int imageID, int startX, int startY, Direction startDirection, double size, unsigned int depth);
 	virtual ~Actor();
-	virtual void doSomething()=0;
+	virtual void doSomething() { return; }
 	virtual void getAnnoyed() { return; }
 	StudentWorld* getWorld() { return m_studentWorld; }
 	void setWorld(StudentWorld* studentWorld) { this->m_studentWorld = studentWorld; }
@@ -35,7 +35,6 @@ private:
 class Ice : public Actor {
 public:
 	Ice (int startX, int startY);
-	virtual void doSomething();
 	~Ice();
 };
 
