@@ -28,6 +28,7 @@ Iceman::Iceman()
 	m_sonarCharge = 1;
 	m_goldNuggest = 0;
 	m_needRemoveIce = false;
+	m_isShoot = false;
 	
 }
 
@@ -36,6 +37,7 @@ void Iceman::doSomething() {
 	if (!getAlive())
 		return;
 
+	m_isShoot = false;
 
 	int i;
 	if (getWorld()->getKey(i)) {
@@ -46,7 +48,7 @@ void Iceman::doSomething() {
 				if (getY() + 1 > 60)
 					moveTo(getX(), getY());
 				else if (getWorld()->isBoulderAhead(getX(),getY()+1))
-					moveTo(getX(), getY());
+					break;
 				else
 					moveTo(getX(), getY() + 1);
 			}
@@ -59,7 +61,7 @@ void Iceman::doSomething() {
 				if (getY() - 1 < 0)
 					moveTo(getX(), getY());
 				else if (getWorld()->isBoulderAhead(getX(), getY()-1))
-					moveTo(getX(), getY());
+					break;
 				else
 					moveTo(getX(), getY() - 1);
 			}
@@ -72,7 +74,7 @@ void Iceman::doSomething() {
 				if (getX() - 1 < 0)
 					moveTo(getX(), getY());
 				else if (getWorld()->isBoulderAhead(getX()-1, getY()))
-					moveTo(getX(), getY());
+					break;
 				else
 					moveTo(getX() - 1, getY());
 			}
@@ -85,13 +87,16 @@ void Iceman::doSomething() {
 				if (getX()+1>61)
 					moveTo(getX(), getY());
 				else if (getWorld()->isBoulderAhead(getX()+1, getY()))
-					moveTo(getX(), getY());
+					break;
 				else
 					moveTo(getX() + 1, getY());
 			}
 			else
 				setDirection(right);
 			break;
+
+		case KEY_PRESS_SPACE:
+			m_isShoot = true;
 
 		default:
 			break;
@@ -102,9 +107,10 @@ void Iceman::doSomething() {
 		m_needRemoveIce = true;
 		GameController::getInstance().playSound(SOUND_DIG);
 	}
-
 	else
 		m_needRemoveIce = false;
+
+
 	
 }
 
@@ -150,13 +156,17 @@ bool Boulder::isStopFalling() {
 	int BoulderY = getY();
 	if (getWorld()->isBottomCoveredByIce(BoulderX, BoulderY))
 		return true;
-	return false;
+	else if (BoulderY == 0)
+		return true;
+	else if (getWorld()->isBottomAnotherBoulder(BoulderX, BoulderY))
+		return true;
+	else
+		return false;
 }
 
 void Boulder::doSomething() {
 	if (!getAlive())
 		return;
-	
 	
 	if (m_state != falling)
 		checkState(m_state);
@@ -171,6 +181,7 @@ void Boulder::doSomething() {
 			setAlive(false);
 			break;
 		}
+		GameController::getInstance().playSound(SOUND_FALLING_ROCK);
 		moveTo(getX(), getY() - 1);
 		break;
 	default:
@@ -179,3 +190,9 @@ void Boulder::doSomething() {
 
 	m_tickCounter++;
 }
+
+Squirt::Squirt(int startX, int startY, Direction startDir) :Actor(IID_WATER_SPURT, startX, startY, startDir , 1, 1) {
+
+}
+
+Squirt::~Squirt() {}

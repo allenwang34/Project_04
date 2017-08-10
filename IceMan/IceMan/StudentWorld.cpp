@@ -141,18 +141,7 @@ int StudentWorld::move()
 		it++;
 	}
 
-	list<Actor*>::iterator it2 = m_gameObjectList.begin();
-	for (int i = 0; i < m_boulderNum; i++) {
-	 
-		if ((*it2) != nullptr && (*it2)->getAlive() == false) {
-			Actor* temp = *it2;
-			*it2 = nullptr;
-			delete temp;
-		}
-		it2++;
-	}
-
-	
+	cleanDeadObjects();
 	return GWSTATUS_CONTINUE_GAME;
 }
 
@@ -176,6 +165,17 @@ bool StudentWorld::isBottomCoveredByIce(const int x, const int y) {
 		return false;
 	else
 		return true;
+}
+
+bool StudentWorld::isBottomAnotherBoulder(const int x, const int y) {
+
+	list<Actor*>::iterator it = m_gameObjectList.begin();
+	for (int i = 0; i < m_boulderNum; i++) {
+		if ( (*it) != nullptr && y - 1 == (*it)->getY())
+			return true;
+		it++;
+	}
+	return false;
 }
 
 
@@ -245,3 +245,15 @@ bool StudentWorld::isBoulderAhead(const int x, const int y) {
 
 }
 
+void StudentWorld::cleanDeadObjects() {
+	list<Actor*>::iterator it = m_gameObjectList.begin();
+	//for (int i = 0; i < m_boulderNum; i++) {
+	while (it != m_gameObjectList.end()) {
+		if ((*it) != nullptr && (*it)->getAlive() == false) {
+			Actor* temp = *it;
+			*it = nullptr;
+			delete temp;
+		}
+		it++;
+	}
+}

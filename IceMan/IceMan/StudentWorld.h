@@ -24,6 +24,7 @@ public:
 	void removeIce(const int x,const int y);
 	bool isBoulderAhead(const int x, const int y);
 	bool isBottomCoveredByIce(const int x, const int y);
+	bool isBottomAnotherBoulder(const int x, const int y);
 	
 
 private:
@@ -39,7 +40,7 @@ private:
 	std::list<Actor*> m_gameObjectList;
 	int getRandNum(int min, int max);
 	void regenRandNum(int &X, int&y, int Xmin, int Xmax, int Ymin, int Ymax);
-	
+	void cleanDeadObjects();
 	
 };
 

@@ -58,6 +58,7 @@ private:
 	int m_sonarCharge;
 	int m_goldNuggest;
 	bool m_needRemoveIce;
+	bool m_isShoot;
 };
 
 
@@ -82,7 +83,15 @@ private:
 
 };
 
+class Squirt 
+	:public Actor  {
+public:
+	Squirt(int startX, int startY, Direction startDir);
+	~Squirt();
 
+private:
+
+};
 
 
 
