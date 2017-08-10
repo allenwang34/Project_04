@@ -55,8 +55,11 @@ int StudentWorld::init()
 					Ice *newIce = new Ice(x, y);
 					m_oilField[x][y] = newIce;
 				}
-				else
-					m_oilField[x][y] = nullptr;
+				else {
+					Ice *newIce = new Ice(x, y);
+					m_oilField[x][y] = newIce;
+					newIce->setVisible(false);
+				}
 			}
 		}
 	}
@@ -73,6 +76,7 @@ int StudentWorld::init()
 			int randY = getRandNum(20, 56);
 			removeIce(randX, randY);
 			Boulder* newBoulder = new Boulder(randX, randY);
+			newBoulder->setWorld(this);
 			m_gameObjectList.push_back(newBoulder);
 		}
 		else { //if the game object is not empty
@@ -91,11 +95,9 @@ int StudentWorld::init()
 			}
 			//after thi while loop, the x and y value are valid to use
 			Boulder* newBoulder = new Boulder(randX, randY); //create game object at x and y
+			newBoulder->setWorld(this);
 			m_gameObjectList.push_back(newBoulder);
 			removeIce(randX, randY);
-
-		
-
 		}
 	}
 
@@ -132,6 +134,25 @@ int StudentWorld::move()
 		return GWSTATUS_FINISHED_LEVEL;
 	}
 
+	list<Actor*>::iterator it = m_gameObjectList.begin();
+	for (int i = 0; i < m_boulderNum; i++) {
+		if ((*it != nullptr))
+			(*it)->doSomething();
+		it++;
+	}
+
+	list<Actor*>::iterator it2 = m_gameObjectList.begin();
+	for (int i = 0; i < m_boulderNum; i++) {
+	 
+		if ((*it2) != nullptr && (*it2)->getAlive() == false) {
+			Actor* temp = *it2;
+			*it2 = nullptr;
+			delete temp;
+		}
+		it2++;
+	}
+
+	
 	return GWSTATUS_CONTINUE_GAME;
 }
 
@@ -149,6 +170,13 @@ bool StudentWorld::isCoveredByIce(const int x,const int y) {
 	return false;
 }
 
+bool StudentWorld::isBottomCoveredByIce(const int x, const int y) {
+	if (m_oilField[x][y - 1]->isVisible()==false && m_oilField[x + 1][y - 1]->isVisible() == false
+		&& m_oilField[x + 2][y - 1]->isVisible()==false && m_oilField[x + 3][y - 1]->isVisible()==false)
+		return false;
+	else
+		return true;
+}
 
 
 void StudentWorld::removeIce(const int x,const int y) {
@@ -163,6 +191,7 @@ void StudentWorld::removeIce(const int x,const int y) {
 	
 	
 }
+
 
 
 void StudentWorld::cleanUp() {
@@ -200,12 +229,14 @@ bool StudentWorld::isBoulderAhead(const int x, const int y) {
 
 	list<Actor*>::iterator it = m_gameObjectList.begin();
 	for (int i = 0; i < m_boulderNum; i++) {
-		int boulderX = (*it)->getX();
-		int boulderY = (*it)->getY();
-		for (int i = x; i < std::min(x + 4, 64); i++) {
-			for (int j = y; j < std::min(y + 4, 60); j++) {
-				if (x >= boulderX-2 && x <= boulderX + 2 && y >= boulderY-2 && y <= boulderY + 2)
-					return true;
+		if (*it != nullptr) {
+			int boulderX = (*it)->getX();
+			int boulderY = (*it)->getY();
+			for (int i = x; i < std::min(x + 4, 64); i++) {
+				for (int j = y; j < std::min(y + 4, 60); j++) {
+					if (x >= boulderX - 2 && x <= boulderX + 2 && y >= boulderY - 2 && y <= boulderY + 2)
+						return true;
+				}
 			}
 		}
 		it++;
@@ -213,3 +244,4 @@ bool StudentWorld::isBoulderAhead(const int x, const int y) {
 	return false;
 
 }
+

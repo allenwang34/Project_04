@@ -68,9 +68,16 @@ public:
 	Boulder(int startX, int startY);
 	~Boulder();
 	virtual void doSomething();
+	
 
 private:
-
+	enum State { stable, waiting, falling };
+	void checkState(State &state);
+	bool isWaiting();
+	bool isStopFalling();
+	int m_tickCounter;
+	int m_waitStart;
+	State m_state;
 
 
 };

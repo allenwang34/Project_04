@@ -113,12 +113,69 @@ void Iceman::getAnnoyed() { return; }
 Iceman::~Iceman() { }
 
 Boulder::Boulder(int startX, int startY) 
-	: Actor(IID_BOULDER, startX, startY, down, 1, 1) { }
+	: Actor(IID_BOULDER, startX, startY, down, 1, 1) { 
+	m_tickCounter = 0;
+	m_waitStart = 0;
+	m_state = stable;
+}
 
 Boulder::~Boulder() {}
+
+
+void Boulder::checkState(State &state) {
+	int BoulderX = getX();
+	int BoulderY = getY();
+	if (getWorld()->isBottomCoveredByIce(BoulderX, BoulderY)) {
+		state = stable;
+	}
+	else if (!getWorld()->isBottomCoveredByIce(BoulderX, BoulderY) && isWaiting()) {
+		state = waiting;
+	}
+	else
+		state = falling;
+}
+
+bool Boulder::isWaiting() {
+	if (m_waitStart == 0)
+		m_waitStart = m_tickCounter;
+	else {
+		if (m_tickCounter > m_waitStart + 30)
+			return false;
+	}
+	return true;
+}
+
+bool Boulder::isStopFalling() {
+	int BoulderX = getX();
+	int BoulderY = getY();
+	if (getWorld()->isBottomCoveredByIce(BoulderX, BoulderY))
+		return true;
+	return false;
+}
 
 void Boulder::doSomething() {
 	if (!getAlive())
 		return;
-	return;
+	
+	
+	if (m_state != falling)
+		checkState(m_state);
+	switch (m_state) {
+	case stable:
+		break;
+	case waiting:
+		break;
+	case falling:
+		if (isStopFalling()) {
+			setVisible(false);
+			setAlive(false);
+			break;
+		}
+		moveTo(getX(), getY() - 1);
+		break;
+	default:
+		break;
+	}
+
+	m_tickCounter++;
 }
