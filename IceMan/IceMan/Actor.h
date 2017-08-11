@@ -18,7 +18,6 @@ public:
 	void setWorld(StudentWorld* studentWorld) { this->m_studentWorld = studentWorld; }
 	void setIsAnnoyed(bool annoyedOrNot) { isAnnoyed = annoyedOrNot; }
 	bool getIsAnnoyed() { return isAnnoyed; }
-
 	void setAlive(bool aliveOrNot) { isAlive = aliveOrNot; }
 	bool getAlive() { return isAlive; }
 
@@ -50,8 +49,11 @@ public:
 	int GetHealth() const { return m_hitPoints * 10; }
 	int GetGold() const { return m_goldNuggest; }
 	int GetSonar() const { return m_sonarCharge; }
-
-
+	bool isShoot() const { return m_isShoot; }
+	int GetSquirtBornX() const { return m_squirtBornX; }
+	int GetSquirtBornY() const { return m_squirtBornY; }
+	void setSquirtBornXY();
+	
 private:
 	int m_hitPoints;
 	int m_waterAmmo;
@@ -59,6 +61,8 @@ private:
 	int m_goldNuggest;
 	bool m_needRemoveIce;
 	bool m_isShoot;
+	int m_squirtBornX;
+	int m_squirtBornY;
 };
 
 
@@ -83,13 +87,17 @@ private:
 
 };
 
+
+
 class Squirt 
 	:public Actor  {
 public:
 	Squirt(int startX, int startY, Direction startDir);
 	~Squirt();
+	virtual void doSomething();
 
 private:
+	int m_distTraveled;
 
 };
 

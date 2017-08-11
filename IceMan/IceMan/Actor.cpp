@@ -29,6 +29,8 @@ Iceman::Iceman()
 	m_goldNuggest = 0;
 	m_needRemoveIce = false;
 	m_isShoot = false;
+	int m_squirtBornX = 0;
+	int m_squirtBornY = 0;
 	
 }
 
@@ -96,6 +98,10 @@ void Iceman::doSomething() {
 			break;
 
 		case KEY_PRESS_SPACE:
+			if (m_waterAmmo <= 0)
+				break;
+			m_waterAmmo--;
+			setSquirtBornXY();
 			m_isShoot = true;
 
 		default:
@@ -115,6 +121,35 @@ void Iceman::doSomething() {
 }
 
 void Iceman::getAnnoyed() { return; }
+
+
+void Iceman::setSquirtBornXY() {
+	Direction Dir = getDirection();
+	switch (Dir) {
+	case up:
+		m_squirtBornX = getX();
+		m_squirtBornY = getY() + 4;
+		break;
+	case down:
+		m_squirtBornX = getX();
+		m_squirtBornY = getY() - 4;
+		break;
+	case left:
+		m_squirtBornX = getX() - 4;
+		m_squirtBornY = getY();
+		break;
+	case right:
+		m_squirtBornX = getX() + 4;
+		m_squirtBornY = getY();
+		break;
+	default:
+		break;
+	}
+}
+
+
+
+
 
 Iceman::~Iceman() { }
 
@@ -192,6 +227,41 @@ void Boulder::doSomething() {
 }
 
 Squirt::Squirt(int startX, int startY, Direction startDir) :Actor(IID_WATER_SPURT, startX, startY, startDir , 1, 1) {
+	m_distTraveled = 0;
+}
+
+
+
+void Squirt::doSomething() {
+
+	int squirtX = getX();
+	int squirtY = getY();
+	if (getWorld()->isCoveredByIce(squirtX, squirtY) || getWorld()->isBoulderAhead(squirtX, squirtY))
+		setAlive(false);
+
+	if (m_distTraveled <= 4) {
+		switch (getDirection()) {
+
+		case up:
+			moveTo(squirtX, squirtY + 1);
+			break;
+		case down:
+			moveTo(squirtX, squirtY- 1);
+			break;
+		case right:
+			moveTo(squirtX + 1, squirtY);
+			break;
+		case left:
+			moveTo(squirtX - 1, squirtY);
+			break;
+		default:
+			break;
+		}
+		m_distTraveled++;
+	}
+	else {
+		setAlive(false);
+	}
 
 }
 

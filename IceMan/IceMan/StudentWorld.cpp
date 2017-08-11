@@ -69,6 +69,7 @@ int StudentWorld::init()
 	m_iceman = new Iceman(); // create Iceman
 	m_iceman->setWorld(this);
 
+
 	for (int i = 0; i < m_boulderNum; i++) {
 		
 		if (m_gameObjectList.empty()) { //if the object list is empty, just create game object at random position
@@ -133,15 +134,26 @@ int StudentWorld::move()
 		increaseScore(-1000);
 		return GWSTATUS_FINISHED_LEVEL;
 	}
+	if (m_iceman->isShoot()) {
+		int SquirtBornX = m_iceman->GetSquirtBornX();
+		int SquirtBornY = m_iceman->GetSquirtBornY();
+		if (!isCoveredByIce(SquirtBornX, SquirtBornY) && !isBoulderAhead(SquirtBornX, SquirtBornY)) {
+			Squirt *newSquirt = new Squirt(SquirtBornX, SquirtBornY, m_iceman->getDirection());
+			newSquirt->setWorld(this);
+			m_gameObjectList.push_back(newSquirt);
+		}
+	}
 
-	list<Actor*>::iterator it = m_gameObjectList.begin();
-	for (int i = 0; i < m_boulderNum; i++) {
+
+
+	list<Actor*>::iterator it = m_gameObjectList.begin(); //ask every object in the list, if not dead, do something. 
+	while (it!=m_gameObjectList.end()) {
 		if ((*it != nullptr))
 			(*it)->doSomething();
 		it++;
 	}
 
-	cleanDeadObjects();
+	cleanDeadObjects(); //clean all the dead objects 
 	return GWSTATUS_CONTINUE_GAME;
 }
 
@@ -207,6 +219,7 @@ void StudentWorld::cleanUp() {
 			delete *it;
 			it = m_gameObjectList.erase(it);
 	}
+
 }
 
 
@@ -247,7 +260,6 @@ bool StudentWorld::isBoulderAhead(const int x, const int y) {
 
 void StudentWorld::cleanDeadObjects() {
 	list<Actor*>::iterator it = m_gameObjectList.begin();
-	//for (int i = 0; i < m_boulderNum; i++) {
 	while (it != m_gameObjectList.end()) {
 		if ((*it) != nullptr && (*it)->getAlive() == false) {
 			Actor* temp = *it;
@@ -256,4 +268,5 @@ void StudentWorld::cleanDeadObjects() {
 		}
 		it++;
 	}
+
 }

@@ -42,6 +42,7 @@ private:
 	void regenRandNum(int &X, int&y, int Xmin, int Xmax, int Ymin, int Ymax);
 	void cleanDeadObjects();
 	
+	
 };
 
 #endif // STUDENTWORLD_H_
