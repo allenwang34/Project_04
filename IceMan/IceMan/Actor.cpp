@@ -13,6 +13,51 @@ Actor::Actor(int imageID, int startX, int startY, Direction startDirection, doub
 
 Actor::~Actor() {}
 
+ActivatingObject::ActivatingObject(int imageID, int startX, int startY, Direction startDirection, double size, unsigned int depth) 
+	: Actor(imageID, startX,startY,startDirection,size,depth) {
+	setActive(false);
+	setVisible(false);
+}
+
+void ActivatingObject::RevealItself() {
+	if (!isVisible() && getWorld()->isIcemanNearBy(getX(), getY(), 4)) {
+		setVisible(true);
+	}
+	return;
+}
+
+bool ActivatingObject::isPickup() {
+	if (isVisible() && getWorld()->isIcemanNearBy(getX(), getY(), 4)) {
+		setActive(true);
+		setAlive(false);
+		return true;
+	}
+	return false;
+}
+
+ActivatingObject::~ActivatingObject() {}
+
+Oil::Oil(int startX, int startY)
+	: ActivatingObject(IID_BARREL, startX, startY, right, 1, 2) {
+
+}
+
+void Oil::doSomething() {
+	if (!getAlive())
+		return;
+	RevealItself();
+	if(isPickup()) {
+		GameController::getInstance().playSound(SOUND_FOUND_OIL);
+		getWorld()->increaseScore(1000);
+		getWorld()->decOilNum();
+	}
+	return;
+	
+}
+
+Oil::~Oil() {}
+
+
 Ice::Ice(int Startx, int Starty)
 	: Actor(IID_ICE, Startx, Starty, right, 0.25, 3) {
 }
@@ -100,6 +145,7 @@ void Iceman::doSomething() {
 		case KEY_PRESS_SPACE:
 			if (m_waterAmmo <= 0)
 				break;
+			GameController::getInstance().playSound(SOUND_PLAYER_SQUIRT);
 			m_waterAmmo--;
 			setSquirtBornXY();
 			m_isShoot = true;

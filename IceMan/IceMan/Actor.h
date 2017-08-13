@@ -17,9 +17,9 @@ public:
 	StudentWorld* getWorld() { return m_studentWorld; }
 	void setWorld(StudentWorld* studentWorld) { this->m_studentWorld = studentWorld; }
 	void setIsAnnoyed(bool annoyedOrNot) { isAnnoyed = annoyedOrNot; }
-	bool getIsAnnoyed() { return isAnnoyed; }
+	bool getIsAnnoyed() const { return isAnnoyed; } 
 	void setAlive(bool aliveOrNot) { isAlive = aliveOrNot; }
-	bool getAlive() { return isAlive; }
+	bool getAlive() const { return isAlive; } 
 
 
 private:
@@ -29,7 +29,30 @@ private:
 
 };
 
+class ActivatingObject : public Actor {
+public:
+	ActivatingObject(int imageID, int startX, int startY, Direction startDirection, double size, unsigned int depth);
+	~ActivatingObject();
+	bool getActive() const { return isActive; }
+	void setActive(bool isActiveOrNot) { isActive = isActiveOrNot; }
+	void RevealItself();
+	bool isPickup();
+private:
+	bool isActive;
 
+
+
+};
+
+class Oil : public ActivatingObject {
+public:
+	Oil(int startX, int startY);
+	~Oil();
+	virtual void doSomething();
+private:
+
+
+};
 
 class Ice : public Actor {
 public:

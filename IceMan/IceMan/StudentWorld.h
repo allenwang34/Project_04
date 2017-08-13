@@ -25,7 +25,8 @@ public:
 	bool isBoulderAhead(const int x, const int y);
 	bool isBottomCoveredByIce(const int x, const int y);
 	bool isBottomAnotherBoulder(const int x, const int y);
-	
+	bool isIcemanNearBy(const int x, const int y, const int dist);
+	void decOilNum() { m_oilNum--; }
 
 private:
 

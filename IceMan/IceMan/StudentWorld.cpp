@@ -70,7 +70,7 @@ int StudentWorld::init()
 	m_iceman->setWorld(this);
 
 
-	for (int i = 0; i < m_boulderNum; i++) {
+	for (int i = 0; i < m_boulderNum; i++) { //create boulders
 		
 		if (m_gameObjectList.empty()) { //if the object list is empty, just create game object at random position
 			int randX = getRandNum(0, 60);
@@ -82,7 +82,7 @@ int StudentWorld::init()
 		}
 		else { //if the game object is not empty
 			list<Actor*>::iterator it = m_gameObjectList.begin();
-			int randX = getRandNum(0, 60); //get random x and random y value
+			int randX = getRandNum(0, 59); //get random x and random y value
 			int randY = getRandNum(20, 56);
 			while (it != m_gameObjectList.end()) { // compare the distance with every element in the list
 				int objectX = (*it)->getX();
@@ -92,7 +92,9 @@ int StudentWorld::init()
 					regenRandNum(randX, randY, 0, 60, 20, 56); //re-generate x and y 
 					it = m_gameObjectList.begin(); //compare the entire list again 
 				}
-				it++; //keep comparing the next element in the list
+				else {
+					it++; //keep comparing the next element in the list
+				}
 			}
 			//after thi while loop, the x and y value are valid to use
 			Boulder* newBoulder = new Boulder(randX, randY); //create game object at x and y
@@ -102,6 +104,29 @@ int StudentWorld::init()
 		}
 	}
 
+	for (int i = 0; i < m_oilNum; i++) {
+		list<Actor*>::iterator it = m_gameObjectList.begin();
+		int randX = getRandNum(0, 63); //get random x and random y value
+		int randY = getRandNum(0, 59);
+		while (it != m_gameObjectList.end()) { // compare the distance with every element in the list
+			int objectX = (*it)->getX();
+			int objectY = (*it)->getY();
+			double distance = sqrt(pow((objectX - randX), 2) + pow((objectY - randY), 2));
+			if (distance < 6) { //if the distance is within 6 
+				regenRandNum(randX, randY, 0, 60, 20, 56); //re-generate x and y 
+				it = m_gameObjectList.begin(); //compare the entire list again 
+			}
+			else {
+				it++; //keep comparing the next element in the list
+			}
+		}
+		//after thi while loop, the x and y value are valid to use
+		Oil* newOil = new Oil(randX, randY); //create game object at x and y
+		newOil->setWorld(this);
+		m_gameObjectList.push_back(newOil);
+
+
+	}
 
 
 
@@ -120,6 +145,10 @@ int StudentWorld::move()
 	//decLives();
 	//return GWSTATUS_PLAYER_DIED;
 
+	if (m_oilNum == 0) {
+		return GWSTATUS_FINISHED_LEVEL;
+	}
+
 	setGameStatText("Level: " + std::to_string(getLevel()) + " Lives: " + std::to_string(getLives()) + " Hlth: "
 		+ std::to_string(m_iceman->GetHealth()) + "%" + " Wtr: " + std::to_string(m_iceman->GetWaterAmount())
 		+ " Gld: " + std::to_string(m_iceman->GetGold()) + " Oil Left: " + std::to_string(m_oilNum) + " Sonar: "
@@ -130,10 +159,7 @@ int StudentWorld::move()
 	if (m_iceman->isRemoveIce()) {
 		removeIce(m_iceman->getX(), m_iceman->getY());
 	}
-	if (getScore() > 1000) {
-		increaseScore(-1000);
-		return GWSTATUS_FINISHED_LEVEL;
-	}
+	
 	if (m_iceman->isShoot()) {
 		int SquirtBornX = m_iceman->GetSquirtBornX();
 		int SquirtBornY = m_iceman->GetSquirtBornY();
@@ -157,6 +183,15 @@ int StudentWorld::move()
 	return GWSTATUS_CONTINUE_GAME;
 }
 
+
+bool StudentWorld::isIcemanNearBy(const int x, const int y, const int dist) {
+	int icemanX = m_iceman->getX();
+	int icemanY = m_iceman->getY();
+	if (sqrt(pow((icemanX - x), 2) + pow((icemanY - y), 2)) <= dist)
+		return true;
+	else
+		return false;
+}
 
 
 bool StudentWorld::isCoveredByIce(const int x,const int y) {
@@ -196,7 +231,6 @@ void StudentWorld::removeIce(const int x,const int y) {
 		for (int j = y; j < std::min(y+4, 60); j++) {
 			if (m_oilField[i][j] != nullptr) {
 				m_oilField[i][j]->setVisible(false);
-				increaseScore(1);
 			}
 		}
 	}
