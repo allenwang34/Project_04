@@ -354,7 +354,11 @@ bool Boulder::isWaiting() {
 bool Boulder::isStopFalling() {
 	int BoulderX = getX();
 	int BoulderY = getY();
-	if (getWorld()->isBottomCoveredByIce(BoulderX, BoulderY))
+	if (getWorld()->isBottomIceman(BoulderX, BoulderY)) {
+		getWorld()->getPlayer()->setAlive(false);
+		return true;
+	}
+	else if (getWorld()->isBottomCoveredByIce(BoulderX, BoulderY))
 		return true;
 	else if (BoulderY == 0)
 		return true;

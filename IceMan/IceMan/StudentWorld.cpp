@@ -259,19 +259,30 @@ bool StudentWorld::isBottomCoveredByIce(const int x, const int y) {
 		return true;
 }
 
+bool StudentWorld::isBottomIceman(const int x, const int y) {
+	if (y - 1 == m_iceman->getY()) {
+		int icemanX = m_iceman->getX();
+		if (icemanX - x >= 0 && icemanX - x <= 3)
+			return true;
+	}
+	return false;
+}
+
 bool StudentWorld::isBottomAnotherBoulder(const int x, const int y) {
 
 	list<Actor*>::iterator it = m_gameObjectList.begin();
 	for (int i = 0; i < m_boulderNum; i++) {
-		if ( (*it) != nullptr && y - 1 == (*it)->getY())
-			return true;
+		if ((*it) != nullptr && y - 1 == (*it)->getY()) {
+			int objectX = (*it)->getX();
+			if(objectX-x>=0 && objectX-x<=3)
+				return true;
+		}
 		it++;
 	}
 	return false;
 }
 
-
-void StudentWorld::removeIce(const int x,const int y) {
+void StudentWorld::removeIce(const int x, const int y) {
 	for (int i = x; i < std::min(x+4, 64); i++) {
 		for (int j = y; j < std::min(y+4, 60); j++) {
 			if (m_oilField[i][j] != nullptr) {
