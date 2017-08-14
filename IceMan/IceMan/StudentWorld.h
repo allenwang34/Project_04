@@ -27,6 +27,9 @@ public:
 	bool isBottomAnotherBoulder(const int x, const int y);
 	bool isIcemanNearBy(const int x, const int y, const int dist);
 	void decOilNum() { m_oilNum--; }
+	Iceman* getPlayer() { return m_iceman; }
+	void shootWaterSquirt(int bornX, int bornY);
+	void dropGold(int startX, int startY);
 
 private:
 

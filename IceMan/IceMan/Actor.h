@@ -35,7 +35,7 @@ public:
 	~ActivatingObject();
 	bool getActive() const { return isActive; }
 	void setActive(bool isActiveOrNot) { isActive = isActiveOrNot; }
-	void RevealItself();
+	bool isRevealItself();
 	bool isPickup();
 private:
 	bool isActive;
@@ -67,23 +67,21 @@ public:
 	~Iceman();
 	virtual void doSomething();
 	virtual void getAnnoyed();
-	bool isRemoveIce() { return m_needRemoveIce; }
 	int GetWaterAmount() const { return m_waterAmmo; } 
 	int GetHealth() const { return m_hitPoints * 10; }
 	int GetGold() const { return m_goldNuggest; }
 	int GetSonar() const { return m_sonarCharge; }
-	bool isShoot() const { return m_isShoot; }
 	int GetSquirtBornX() const { return m_squirtBornX; }
 	int GetSquirtBornY() const { return m_squirtBornY; }
 	void setSquirtBornXY();
+	void increGoldNum() { m_goldNuggest++; }
+	void decreGoldNum() { m_goldNuggest--; }
 	
 private:
 	int m_hitPoints;
 	int m_waterAmmo;
 	int m_sonarCharge;
 	int m_goldNuggest;
-	bool m_needRemoveIce;
-	bool m_isShoot;
 	int m_squirtBornX;
 	int m_squirtBornY;
 };
@@ -124,7 +122,20 @@ private:
 
 };
 
+class Gold : public ActivatingObject {
+public:
+	Gold(int startX, int startY, bool isPermanent);
+	~Gold();
+	virtual void doSomething();
+private:
+	enum State { permanent, temporary };
+	State m_state;
+	bool m_isIcemanPickupable;
+	int m_timer;
 
+
+
+};
 
 
 

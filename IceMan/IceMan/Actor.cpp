@@ -19,11 +19,12 @@ ActivatingObject::ActivatingObject(int imageID, int startX, int startY, Directio
 	setVisible(false);
 }
 
-void ActivatingObject::RevealItself() {
+bool ActivatingObject::isRevealItself() {
 	if (!isVisible() && getWorld()->isIcemanNearBy(getX(), getY(), 4)) {
 		setVisible(true);
+		return true;
 	}
-	return;
+	return false;
 }
 
 bool ActivatingObject::isPickup() {
@@ -37,6 +38,50 @@ bool ActivatingObject::isPickup() {
 
 ActivatingObject::~ActivatingObject() {}
 
+Gold::Gold(int startX, int startY, bool isPermanent) 
+	: ActivatingObject(IID_GOLD, startX, startY, right, 1, 2) {
+	if (isPermanent) {
+		m_state = permanent;
+		setVisible(false);
+		m_isIcemanPickupable = true;
+	}
+	else {
+		m_state = temporary;
+		setVisible(true);
+		m_isIcemanPickupable = false;
+	}
+	m_timer = 0;
+
+}
+
+void Gold::doSomething() {
+	if (!getAlive())
+		return;
+	switch (m_state)
+	{
+	case Gold::permanent:
+		if (isRevealItself())
+			return;
+		else if (isPickup()) {
+			GameController::getInstance().playSound(SOUND_GOT_GOODIE);
+			getWorld()->getPlayer()->increGoldNum();
+			getWorld()->increaseScore(10);
+		}
+		break;
+	case Gold::temporary:
+		if (m_timer > 99)
+			setVisible(false);
+		m_timer++;
+		break;
+	default:
+		break;
+	}
+
+}
+
+Gold::~Gold() {}
+
+
 Oil::Oil(int startX, int startY)
 	: ActivatingObject(IID_BARREL, startX, startY, right, 1, 2) {
 
@@ -45,13 +90,15 @@ Oil::Oil(int startX, int startY)
 void Oil::doSomething() {
 	if (!getAlive())
 		return;
-	RevealItself();
-	if(isPickup()) {
+	else if (isRevealItself())
+		return;
+	else  if (isPickup()) {
 		GameController::getInstance().playSound(SOUND_FOUND_OIL);
 		getWorld()->increaseScore(1000);
 		getWorld()->decOilNum();
 	}
-	return;
+	else
+		return;
 	
 }
 
@@ -72,8 +119,6 @@ Iceman::Iceman()
 	m_waterAmmo = 5;
 	m_sonarCharge = 1;
 	m_goldNuggest = 0;
-	m_needRemoveIce = false;
-	m_isShoot = false;
 	int m_squirtBornX = 0;
 	int m_squirtBornY = 0;
 	
@@ -84,12 +129,15 @@ void Iceman::doSomething() {
 	if (!getAlive())
 		return;
 
-	m_isShoot = false;
+
 
 	int i;
 	if (getWorld()->getKey(i)) {
 		switch (i)
 		{
+		case KEY_PRESS_ESCAPE:
+			setAlive(false);
+			break;
 		case KEY_PRESS_UP:
 			if (getDirection() == up) {
 				if (getY() + 1 > 60)
@@ -148,7 +196,13 @@ void Iceman::doSomething() {
 			GameController::getInstance().playSound(SOUND_PLAYER_SQUIRT);
 			m_waterAmmo--;
 			setSquirtBornXY();
-			m_isShoot = true;
+			getWorld()->shootWaterSquirt(GetSquirtBornX(), GetSquirtBornY());
+		case KEY_PRESS_TAB:
+			if (m_goldNuggest > 0) {
+				getWorld()->dropGold(getX(), getY());
+				m_goldNuggest--;
+			}
+			break;
 
 		default:
 			break;
@@ -156,19 +210,17 @@ void Iceman::doSomething() {
 	}
 
 	if (getWorld()->isCoveredByIce(getX(), getY())) {
-		m_needRemoveIce = true;
+		//m_needRemoveIce = true;
+		getWorld()->removeIce(getX(), getY());
 		GameController::getInstance().playSound(SOUND_DIG);
 	}
-	else
-		m_needRemoveIce = false;
 
 
 	
 }
 
+
 void Iceman::getAnnoyed() { return; }
-
-
 void Iceman::setSquirtBornXY() {
 	Direction Dir = getDirection();
 	switch (Dir) {

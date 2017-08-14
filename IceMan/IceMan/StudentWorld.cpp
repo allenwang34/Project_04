@@ -124,11 +124,29 @@ int StudentWorld::init()
 		Oil* newOil = new Oil(randX, randY); //create game object at x and y
 		newOil->setWorld(this);
 		m_gameObjectList.push_back(newOil);
-
-
 	}
 
 
+	for (int i = 0; i < m_goldNum; i++) {
+		list<Actor*>::iterator it = m_gameObjectList.begin();
+		int randX = getRandNum(0, 63);
+		int randY = getRandNum(0, 59);
+		while (it != m_gameObjectList.end()) {
+			int objectX = (*it)->getX();
+			int objectY = (*it)->getY();
+			double distance = sqrt(pow((objectX - randX), 2) + pow((objectY - randY), 2));
+			if (distance < 6) { //if the distance is within 6 
+				regenRandNum(randX, randY, 0, 60, 20, 56); //re-generate x and y 
+				it = m_gameObjectList.begin(); //compare the entire list again 
+			}
+			else {
+				it++; //keep comparing the next element in the list
+			}
+		}
+		Gold* newGold = new Gold(randX, randY, true);
+		newGold->setWorld(this);
+		m_gameObjectList.push_back(newGold);
+	}
 
 	setGameStatText("Level: " + std::to_string(getLevel()) + " Lives: " + std::to_string(getLives()) + " Hlth: " 
 		+ std::to_string(m_iceman->GetHealth()) +"%" + " Wtr: " + std::to_string(m_iceman->GetWaterAmount())
@@ -145,6 +163,13 @@ int StudentWorld::move()
 	//decLives();
 	//return GWSTATUS_PLAYER_DIED;
 
+	if (!m_iceman->getAlive()) {
+		decLives();
+		return GWSTATUS_PLAYER_DIED;
+	}
+
+
+
 	if (m_oilNum == 0) {
 		return GWSTATUS_FINISHED_LEVEL;
 	}
@@ -155,23 +180,7 @@ int StudentWorld::move()
 		+ std::to_string(m_iceman->GetSonar()) + " Score: " + std::to_string(getScore()));
 
 	m_iceman->doSomething();
-
-	if (m_iceman->isRemoveIce()) {
-		removeIce(m_iceman->getX(), m_iceman->getY());
-	}
 	
-	if (m_iceman->isShoot()) {
-		int SquirtBornX = m_iceman->GetSquirtBornX();
-		int SquirtBornY = m_iceman->GetSquirtBornY();
-		if (!isCoveredByIce(SquirtBornX, SquirtBornY) && !isBoulderAhead(SquirtBornX, SquirtBornY)) {
-			Squirt *newSquirt = new Squirt(SquirtBornX, SquirtBornY, m_iceman->getDirection());
-			newSquirt->setWorld(this);
-			m_gameObjectList.push_back(newSquirt);
-		}
-	}
-
-
-
 	list<Actor*>::iterator it = m_gameObjectList.begin(); //ask every object in the list, if not dead, do something. 
 	while (it!=m_gameObjectList.end()) {
 		if ((*it != nullptr))
@@ -183,6 +192,21 @@ int StudentWorld::move()
 	return GWSTATUS_CONTINUE_GAME;
 }
 
+void StudentWorld::dropGold(int startX, int startY) {
+	Gold* newGold = new Gold(startX, startY, false);
+	newGold->setWorld(this);
+	m_gameObjectList.push_back(newGold);
+}
+
+void StudentWorld::shootWaterSquirt(int bornX, int bornY) {
+	int SquirtBornX = bornX;
+	int SquirtBornY = bornY;
+	if (!isCoveredByIce(SquirtBornX, SquirtBornY) && !isBoulderAhead(SquirtBornX, SquirtBornY)) {
+		Squirt *newSquirt = new Squirt(SquirtBornX, SquirtBornY, m_iceman->getDirection());
+		newSquirt->setWorld(this);
+		m_gameObjectList.push_back(newSquirt);
+	}
+}
 
 bool StudentWorld::isIcemanNearBy(const int x, const int y, const int dist) {
 	int icemanX = m_iceman->getX();
@@ -195,7 +219,7 @@ bool StudentWorld::isIcemanNearBy(const int x, const int y, const int dist) {
 
 
 bool StudentWorld::isCoveredByIce(const int x,const int y) {
-	if (y >= 59)
+	if (y >= 60)
 		return false;
 	for (int i = x; i < std::min(x + 4, 64);i++) {
 		for (int j = y; j < std::min(y + 4, 60); j++) {
