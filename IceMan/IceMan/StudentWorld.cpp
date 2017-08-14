@@ -41,6 +41,7 @@ int StudentWorld::init()
 	m_boulderNum = std::min(m_currentLevel / 2 + 2, 9);
 	m_goldNum = std::max(5 - m_currentLevel / 2, 2);
 	m_GoodiePossibility = (m_currentLevel * 25 + 300);
+	m_isSonarKitInField = false;
 
 
 	for (int x = 0; x < oilFieldX; x++) { //create the oil field covered by ice
@@ -128,9 +129,19 @@ int StudentWorld::move()
 
 
 	if (getRandNum(1, m_GoodiePossibility) == m_GoodiePossibility) {
-		SonarKit* newSonarKit = new SonarKit(0, 60);
-		newSonarKit->setWorld(this);
-		m_gameObjectList.push_back(newSonarKit);
+		if (getRandNum(1, 5) != 5) {
+			setRandXY(0,63,0,59);
+			int objectX = m_randXY[0];
+			int objectY = m_randXY[1];
+			WaterPool *newWaterPool = new WaterPool(objectX,objectY);
+			newWaterPool->setWorld(this);
+			m_gameObjectList.push_back(newWaterPool);
+		}
+		else {
+			SonarKit* newSonarKit = new SonarKit(0, 60);
+			newSonarKit->setWorld(this);
+			m_gameObjectList.push_back(newSonarKit);
+		}
 	}
 
 
@@ -153,10 +164,11 @@ void StudentWorld::revealGoodiesAround(int playerX, int playerY) {
 		if (*it != nullptr) {
 			int objectX = (*it)->getX();
 			int objectY = (*it)->getY();
-			if (sqrt(pow((playerX - objectX), 2) + pow((playerY - objectY, 2), 2)) <= 12) {
+			if (sqrt(pow((playerX - objectX), 2) + pow((playerY - objectY), 2)) <= 12) {
 				(*it)->setVisible(true);
 			}
 		}
+		it++;
 	}
 }
 
@@ -174,15 +186,20 @@ void StudentWorld::setRandXY(int xMin, int xMax, int yMin, int yMax) {
 		int randX = getRandNum(0, 59); //get random x and random y value
 		int randY = getRandNum(20, 56);
 		while (it != m_gameObjectList.end()) { // compare the distance with every element in the list
-			int objectX = (*it)->getX();
-			int objectY = (*it)->getY();
-			double distance = sqrt(pow((objectX - randX), 2) + pow((objectY - randY), 2));
-			if (distance < 6) { //if the distance is within 6 
-				regenRandNum(randX, randY, 0, 60, 20, 56); //re-generate x and y 
-				it = m_gameObjectList.begin(); //compare the entire list again 
+			if (*it != nullptr) {
+				int objectX = (*it)->getX();
+				int objectY = (*it)->getY();
+				double distance = sqrt(pow((objectX - randX), 2) + pow((objectY - randY), 2));
+				if (distance < 6) { //if the distance is within 6 
+					regenRandNum(randX, randY, 0, 60, 20, 56); //re-generate x and y 
+					it = m_gameObjectList.begin(); //compare the entire list again 
+				}
+				else {
+					it++; //keep comparing the next element in the list
+				}
 			}
 			else {
-				it++; //keep comparing the next element in the list
+				it++;
 			}
 		}
 		//after thi while loop, the x and y value are valid to use

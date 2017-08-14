@@ -33,6 +33,7 @@ public:
 	void setRandXY(int xMin, int xMax, int yMin, int yMax);
 	int getCurrentLevel() const { return m_currentLevel; }
 	void revealGoodiesAround(int playerX, int playerY);
+	void sonarPickedUp() { m_isSonarKitInField = false; }
 
 private:
 
@@ -50,6 +51,7 @@ private:
 	void regenRandNum(int &X, int&y, int Xmin, int Xmax, int Ymin, int Ymax);
 	void cleanDeadObjects();
 	int m_randXY[2];
+	bool m_isSonarKitInField;
 	
 	
 };

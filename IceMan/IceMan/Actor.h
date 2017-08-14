@@ -87,6 +87,7 @@ public:
 	void decreGoldNum() { m_goldNuggest--; }
 	void increSonarKit() { m_sonarCharge++; }
 	void decreSonarKit() { m_sonarCharge--; }
+	void increWaterAmmo() { m_waterAmmo += 5; }
 	
 private:
 	int m_hitPoints;
@@ -145,6 +146,14 @@ class SonarKit : public ActivatingObject {
 public:
 	SonarKit(int startX, int startY);
 	~SonarKit();
+	virtual void doSomething();
+
+};
+
+class WaterPool : public ActivatingObject {
+public:
+	WaterPool(int startX, int startY);
+	~WaterPool();
 	virtual void doSomething();
 
 };

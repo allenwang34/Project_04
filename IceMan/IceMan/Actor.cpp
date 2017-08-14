@@ -88,6 +88,23 @@ bool ActivatingObject::switchState(int score, int lastTime, bool canPlayerPickUp
 
 ActivatingObject::~ActivatingObject() {}
 
+WaterPool::WaterPool(int startX, int startY) 
+	: ActivatingObject(IID_WATER_POOL, startX, startY, right, 1, 2){
+	setState(temporary);
+
+}
+
+
+void WaterPool::doSomething() {
+	if (!getAlive())
+		return;
+	if (switchState(100, std::max(100, 300 - getWorld()->getCurrentLevel() * 10), true)) {
+		getWorld()->getPlayer()->increWaterAmmo();
+	}
+}
+
+WaterPool::~WaterPool() {}
+
 SonarKit::SonarKit(int startX, int startY) 
 	: ActivatingObject(IID_SONAR, startX, startY, right, 1, 2) {
 	setState(temporary);
@@ -97,8 +114,10 @@ SonarKit::SonarKit(int startX, int startY)
 void SonarKit::doSomething() {
 	if (!getAlive())
 		return;
-	if (switchState(75, std::max(100, 300 - getWorld()->getCurrentLevel() * 10),true))
+	if (switchState(75, std::max(100, 300 - getWorld()->getCurrentLevel() * 10), true)) {
 		getWorld()->getPlayer()->increSonarKit();
+		getWorld()->sonarPickedUp();
+	}
 
 }
 
@@ -244,12 +263,12 @@ void Iceman::doSomething() {
 				getWorld()->dropGold(getX(), getY());
 			}
 			break;
-		//case 122: 
-		case 122:
+
+		case 122: case 90:
 			if (m_sonarCharge > 0) {
 				m_sonarCharge--;
+				GameController::getInstance().playSound(SOUND_SONAR);
 				getWorld()->revealGoodiesAround(getX(), getY());
-				
 			}
 			break;
 
