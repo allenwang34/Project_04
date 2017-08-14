@@ -40,6 +40,7 @@ int StudentWorld::init()
 	m_oilNum = std::min(2 + m_currentLevel, 21);
 	m_boulderNum = std::min(m_currentLevel / 2 + 2, 9);
 	m_goldNum = std::max(5 - m_currentLevel / 2, 2);
+	m_GoodiePossibility = (m_currentLevel * 25 + 300);
 
 
 	for (int x = 0; x < oilFieldX; x++) { //create the oil field covered by ice
@@ -71,82 +72,28 @@ int StudentWorld::init()
 
 
 	for (int i = 0; i < m_boulderNum; i++) { //create boulders
-		
-		if (m_gameObjectList.empty()) { //if the object list is empty, just create game object at random position
-			int randX = getRandNum(0, 60);
-			int randY = getRandNum(20, 56);
-			removeIce(randX, randY);
-			Boulder* newBoulder = new Boulder(randX, randY);
-			newBoulder->setWorld(this);
-			m_gameObjectList.push_back(newBoulder);
-		}
-		else { //if the game object is not empty
-			list<Actor*>::iterator it = m_gameObjectList.begin();
-			int randX = getRandNum(0, 59); //get random x and random y value
-			int randY = getRandNum(20, 56);
-			while (it != m_gameObjectList.end()) { // compare the distance with every element in the list
-				int objectX = (*it)->getX();
-				int objectY = (*it)->getY();
-				double distance = sqrt(pow((objectX - randX), 2) + pow((objectY - randY), 2));
-				if (distance < 6) { //if the distance is within 6 
-					regenRandNum(randX, randY, 0, 60, 20, 56); //re-generate x and y 
-					it = m_gameObjectList.begin(); //compare the entire list again 
-				}
-				else {
-					it++; //keep comparing the next element in the list
-				}
-			}
-			//after thi while loop, the x and y value are valid to use
-			Boulder* newBoulder = new Boulder(randX, randY); //create game object at x and y
-			newBoulder->setWorld(this);
-			m_gameObjectList.push_back(newBoulder);
-			removeIce(randX, randY);
-		}
+		setRandXY(0, 60, 20, 56);
+		removeIce(m_randXY[0], m_randXY[1]);
+		Boulder* newBoulder = new Boulder(m_randXY[0], m_randXY[1]);
+		newBoulder->setWorld(this);
+		m_gameObjectList.push_back(newBoulder);
 	}
 
 	for (int i = 0; i < m_oilNum; i++) {
-		list<Actor*>::iterator it = m_gameObjectList.begin();
-		int randX = getRandNum(0, 63); //get random x and random y value
-		int randY = getRandNum(0, 59);
-		while (it != m_gameObjectList.end()) { // compare the distance with every element in the list
-			int objectX = (*it)->getX();
-			int objectY = (*it)->getY();
-			double distance = sqrt(pow((objectX - randX), 2) + pow((objectY - randY), 2));
-			if (distance < 6) { //if the distance is within 6 
-				regenRandNum(randX, randY, 0, 60, 20, 56); //re-generate x and y 
-				it = m_gameObjectList.begin(); //compare the entire list again 
-			}
-			else {
-				it++; //keep comparing the next element in the list
-			}
-		}
-		//after thi while loop, the x and y value are valid to use
-		Oil* newOil = new Oil(randX, randY); //create game object at x and y
+		setRandXY(0, 63, 0, 59);
+		Oil* newOil = new Oil(m_randXY[0], m_randXY[1]);
 		newOil->setWorld(this);
 		m_gameObjectList.push_back(newOil);
 	}
 
 
 	for (int i = 0; i < m_goldNum; i++) {
-		list<Actor*>::iterator it = m_gameObjectList.begin();
-		int randX = getRandNum(0, 63);
-		int randY = getRandNum(0, 59);
-		while (it != m_gameObjectList.end()) {
-			int objectX = (*it)->getX();
-			int objectY = (*it)->getY();
-			double distance = sqrt(pow((objectX - randX), 2) + pow((objectY - randY), 2));
-			if (distance < 6) { //if the distance is within 6 
-				regenRandNum(randX, randY, 0, 60, 20, 56); //re-generate x and y 
-				it = m_gameObjectList.begin(); //compare the entire list again 
-			}
-			else {
-				it++; //keep comparing the next element in the list
-			}
-		}
-		Gold* newGold = new Gold(randX, randY, true);
+		setRandXY(0, 63, 0, 59);
+		Gold* newGold = new Gold(m_randXY[0], m_randXY[1], true);
 		newGold->setWorld(this);
 		m_gameObjectList.push_back(newGold);
 	}
+
 
 	setGameStatText("Level: " + std::to_string(getLevel()) + " Lives: " + std::to_string(getLives()) + " Hlth: " 
 		+ std::to_string(m_iceman->GetHealth()) +"%" + " Wtr: " + std::to_string(m_iceman->GetWaterAmount())
@@ -169,15 +116,23 @@ int StudentWorld::move()
 	}
 
 
-
 	if (m_oilNum == 0) {
 		return GWSTATUS_FINISHED_LEVEL;
 	}
+
 
 	setGameStatText("Level: " + std::to_string(getLevel()) + " Lives: " + std::to_string(getLives()) + " Hlth: "
 		+ std::to_string(m_iceman->GetHealth()) + "%" + " Wtr: " + std::to_string(m_iceman->GetWaterAmount())
 		+ " Gld: " + std::to_string(m_iceman->GetGold()) + " Oil Left: " + std::to_string(m_oilNum) + " Sonar: "
 		+ std::to_string(m_iceman->GetSonar()) + " Score: " + std::to_string(getScore()));
+
+
+	if (getRandNum(1, m_GoodiePossibility) == m_GoodiePossibility) {
+		SonarKit* newSonarKit = new SonarKit(0, 60);
+		newSonarKit->setWorld(this);
+		m_gameObjectList.push_back(newSonarKit);
+	}
+
 
 	m_iceman->doSomething();
 	
@@ -191,6 +146,55 @@ int StudentWorld::move()
 	cleanDeadObjects(); //clean all the dead objects 
 	return GWSTATUS_CONTINUE_GAME;
 }
+
+void StudentWorld::revealGoodiesAround(int playerX, int playerY) {
+	list<Actor*>::iterator it = m_gameObjectList.begin();
+	while (it != m_gameObjectList.end()) {
+		if (*it != nullptr) {
+			int objectX = (*it)->getX();
+			int objectY = (*it)->getY();
+			if (sqrt(pow((playerX - objectX), 2) + pow((playerY - objectY, 2), 2)) <= 12) {
+				(*it)->setVisible(true);
+			}
+		}
+	}
+}
+
+
+void StudentWorld::setRandXY(int xMin, int xMax, int yMin, int yMax) {
+	if (m_gameObjectList.empty()) { //if the object list is empty, just create game object at random position
+		int randX = getRandNum(xMin, xMax);
+		int randY = getRandNum(yMin, yMax);
+		m_randXY[0] = randX;
+		m_randXY[1] = randY;
+		
+	}
+	else { //if the game object is not empty
+		list<Actor*>::iterator it = m_gameObjectList.begin();
+		int randX = getRandNum(0, 59); //get random x and random y value
+		int randY = getRandNum(20, 56);
+		while (it != m_gameObjectList.end()) { // compare the distance with every element in the list
+			int objectX = (*it)->getX();
+			int objectY = (*it)->getY();
+			double distance = sqrt(pow((objectX - randX), 2) + pow((objectY - randY), 2));
+			if (distance < 6) { //if the distance is within 6 
+				regenRandNum(randX, randY, 0, 60, 20, 56); //re-generate x and y 
+				it = m_gameObjectList.begin(); //compare the entire list again 
+			}
+			else {
+				it++; //keep comparing the next element in the list
+			}
+		}
+		//after thi while loop, the x and y value are valid to use
+		m_randXY[0] = randX;
+		m_randXY[1] = randY;
+	}
+
+
+
+}
+
+
 
 void StudentWorld::dropGold(int startX, int startY) {
 	Gold* newGold = new Gold(startX, startY, false);

@@ -1,6 +1,7 @@
 #include "Actor.h"
 #include "StudentWorld.h"
 #include "GameController.h"
+#include <algorithm>
 
 // Students:  Add code to this file (if you wish), Actor.h, StudentWorld.h, and StudentWorld.cpp
 
@@ -17,6 +18,8 @@ ActivatingObject::ActivatingObject(int imageID, int startX, int startY, Directio
 	: Actor(imageID, startX,startY,startDirection,size,depth) {
 	setActive(false);
 	setVisible(false);
+	m_state = temporary;
+	m_timer = 0;
 }
 
 bool ActivatingObject::isRevealItself() {
@@ -28,7 +31,7 @@ bool ActivatingObject::isRevealItself() {
 }
 
 bool ActivatingObject::isPickup() {
-	if (isVisible() && getWorld()->isIcemanNearBy(getX(), getY(), 4)) {
+	if (isVisible() && getWorld()->isIcemanNearBy(getX(), getY(), 3)) {
 		setActive(true);
 		setAlive(false);
 		return true;
@@ -36,11 +39,9 @@ bool ActivatingObject::isPickup() {
 	return false;
 }
 
-ActivatingObject::~ActivatingObject() {}
 
-Gold::Gold(int startX, int startY, bool isPermanent) 
-	: ActivatingObject(IID_GOLD, startX, startY, right, 1, 2) {
-	if (isPermanent) {
+void ActivatingObject::setState(State targetState) {
+	if (targetState == permanent) {
 		m_state = permanent;
 		setVisible(false);
 		m_isIcemanPickupable = true;
@@ -48,34 +49,76 @@ Gold::Gold(int startX, int startY, bool isPermanent)
 	else {
 		m_state = temporary;
 		setVisible(true);
-		m_isIcemanPickupable = false;
+		m_isIcemanPickupable = true;
 	}
-	m_timer = 0;
+}
+
+
+bool ActivatingObject::switchState(int score, int lastTime, bool canPlayerPickUp) {
+	switch (m_state) {
+	case permanent:
+		if (isRevealItself())
+			return false;
+		else if (isPickup()) {
+			GameController::getInstance().playSound(SOUND_GOT_GOODIE);
+			getWorld()->increaseScore(score);
+			return true;
+		}
+		return false;
+		break;
+	case temporary:
+		if (m_timer > lastTime-1)
+			setAlive(false);
+		if (canPlayerPickUp) {
+			if (isPickup()) {
+				GameController::getInstance().playSound(SOUND_GOT_GOODIE);
+				getWorld()->increaseScore(score);
+				return true;
+			}
+		}
+		m_timer++;
+		return false;
+		break;
+	default:
+		return false;
+		break;
+	}
+	return false;
+}
+
+ActivatingObject::~ActivatingObject() {}
+
+SonarKit::SonarKit(int startX, int startY) 
+	: ActivatingObject(IID_SONAR, startX, startY, right, 1, 2) {
+	setState(temporary);
+}
+
+
+void SonarKit::doSomething() {
+	if (!getAlive())
+		return;
+	if (switchState(75, std::max(100, 300 - getWorld()->getCurrentLevel() * 10),true))
+		getWorld()->getPlayer()->increSonarKit();
+
+}
+
+
+SonarKit::~SonarKit() {}
+
+Gold::Gold(int startX, int startY, bool isPermanent) 
+	: ActivatingObject(IID_GOLD, startX, startY, right, 1, 2) {
+	if (isPermanent)
+		setState(permanent);
+	else
+		setState(temporary);
 
 }
 
 void Gold::doSomething() {
 	if (!getAlive())
 		return;
-	switch (m_state)
-	{
-	case Gold::permanent:
-		if (isRevealItself())
-			return;
-		else if (isPickup()) {
-			GameController::getInstance().playSound(SOUND_GOT_GOODIE);
-			getWorld()->getPlayer()->increGoldNum();
-			getWorld()->increaseScore(10);
-		}
-		break;
-	case Gold::temporary:
-		if (m_timer > 99)
-			setVisible(false);
-		m_timer++;
-		break;
-	default:
-		break;
-	}
+	if (switchState(10, 100,false))
+		getWorld()->getPlayer()->increGoldNum();
 
 }
 
@@ -128,8 +171,6 @@ void Iceman::doSomething() {
 
 	if (!getAlive())
 		return;
-
-
 
 	int i;
 	if (getWorld()->getKey(i)) {
@@ -199,8 +240,16 @@ void Iceman::doSomething() {
 			getWorld()->shootWaterSquirt(GetSquirtBornX(), GetSquirtBornY());
 		case KEY_PRESS_TAB:
 			if (m_goldNuggest > 0) {
-				getWorld()->dropGold(getX(), getY());
 				m_goldNuggest--;
+				getWorld()->dropGold(getX(), getY());
+			}
+			break;
+		//case 122: 
+		case 122:
+			if (m_sonarCharge > 0) {
+				m_sonarCharge--;
+				getWorld()->revealGoodiesAround(getX(), getY());
+				
 			}
 			break;
 
@@ -214,13 +263,12 @@ void Iceman::doSomething() {
 		getWorld()->removeIce(getX(), getY());
 		GameController::getInstance().playSound(SOUND_DIG);
 	}
-
-
-	
 }
 
 
 void Iceman::getAnnoyed() { return; }
+
+
 void Iceman::setSquirtBornXY() {
 	Direction Dir = getDirection();
 	switch (Dir) {

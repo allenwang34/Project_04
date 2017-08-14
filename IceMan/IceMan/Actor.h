@@ -37,8 +37,17 @@ public:
 	void setActive(bool isActiveOrNot) { isActive = isActiveOrNot; }
 	bool isRevealItself();
 	bool isPickup();
+	enum State { permanent, temporary };
+	bool switchState(int score, int lastTime, bool canPlayerPickUp);
+	void setState(State targetState);
+	int getTimer() const { return m_timer; }
+	void increTimer() { m_timer++; }
+	State getState() const { return m_state; }
 private:
 	bool isActive;
+	State m_state;
+	bool m_isIcemanPickupable;
+	int m_timer;
 
 
 
@@ -76,6 +85,8 @@ public:
 	void setSquirtBornXY();
 	void increGoldNum() { m_goldNuggest++; }
 	void decreGoldNum() { m_goldNuggest--; }
+	void increSonarKit() { m_sonarCharge++; }
+	void decreSonarKit() { m_sonarCharge--; }
 	
 private:
 	int m_hitPoints;
@@ -127,13 +138,14 @@ public:
 	Gold(int startX, int startY, bool isPermanent);
 	~Gold();
 	virtual void doSomething();
-private:
-	enum State { permanent, temporary };
-	State m_state;
-	bool m_isIcemanPickupable;
-	int m_timer;
+};
 
 
+class SonarKit : public ActivatingObject {
+public:
+	SonarKit(int startX, int startY);
+	~SonarKit();
+	virtual void doSomething();
 
 };
 

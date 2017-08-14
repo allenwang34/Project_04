@@ -30,6 +30,9 @@ public:
 	Iceman* getPlayer() { return m_iceman; }
 	void shootWaterSquirt(int bornX, int bornY);
 	void dropGold(int startX, int startY);
+	void setRandXY(int xMin, int xMax, int yMin, int yMax);
+	int getCurrentLevel() const { return m_currentLevel; }
+	void revealGoodiesAround(int playerX, int playerY);
 
 private:
 
@@ -41,10 +44,12 @@ private:
 	int m_oilNum;
 	int m_boulderNum;
 	int m_goldNum;
+	int m_GoodiePossibility;
 	std::list<Actor*> m_gameObjectList;
 	int getRandNum(int min, int max);
 	void regenRandNum(int &X, int&y, int Xmin, int Xmax, int Ymin, int Ymax);
 	void cleanDeadObjects();
+	int m_randXY[2];
 	
 	
 };
