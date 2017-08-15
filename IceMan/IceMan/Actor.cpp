@@ -257,6 +257,7 @@ void Iceman::doSomething() {
 			m_waterAmmo--;
 			setSquirtBornXY();
 			getWorld()->shootWaterSquirt(GetSquirtBornX(), GetSquirtBornY());
+			break;
 		case KEY_PRESS_TAB:
 			if (m_goldNuggest > 0) {
 				m_goldNuggest--;
