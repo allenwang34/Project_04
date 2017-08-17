@@ -2,7 +2,7 @@
 #include "StudentWorld.h"
 #include "GameController.h"
 #include <algorithm>
-
+#include <random>
 // Students:  Add code to this file (if you wish), Actor.h, StudentWorld.h, and StudentWorld.cpp
 
 Actor::Actor(int imageID, int startX, int startY, Direction startDirection, double size, unsigned int depth) 
@@ -13,6 +13,45 @@ Actor::Actor(int imageID, int startX, int startY, Direction startDirection, doub
 }
 
 Actor::~Actor() {}
+
+Agent::Agent(int imageID, int startX, int startY, Direction startDirection, double size, unsigned int depth)
+	: Actor(imageID, startX, startY, startDirection, size, depth), m_hitPoints(0),
+	 m_protestorState(StayField), m_tickCounter(0) {
+	m_cuurentLevel = getWorld()->getCurrentLevel;
+	int currentLevelVar = 3 - m_cuurentLevel / 4;
+	m_ticksToWaitBetweenMoves = std::max(0, currentLevelVar);
+	numSquaresToMoveInCurrentDirection = getRandX();
+}
+
+int Agent::getRandX() {
+	std::random_device rd;     // only used once to initialise (seed) engine
+	std::mt19937 rng(rd());    // random-number engine used (Mersenne-Twister in this case)
+	std::uniform_int_distribution<int> uni(8,60); // guaranteed unbiased
+
+	int random_integer = uni(rng);
+	return random_integer;
+}
+
+Agent::~Agent() {}
+
+RegularProtestor::RegularProtestor()
+	:Agent(IID_PROTESTER, 60, 60, left, 1, 0) {
+	setHitpoints(5);
+}
+
+
+void RegularProtestor::doSomething() {
+	if (!getAlive())
+		return;
+	if (getTicksToWait!=0 && getTickCounter() < getTicksToWait()) {
+		increCounter();
+	}
+	if ( getProtestorState() == LeaveField) {
+
+	}
+}
+
+RegularProtestor::~RegularProtestor() {}
 
 ActivatingObject::ActivatingObject(int imageID, int startX, int startY, Direction startDirection, double size, unsigned int depth) 
 	: Actor(imageID, startX,startY,startDirection,size,depth) {

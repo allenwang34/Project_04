@@ -29,6 +29,37 @@ private:
 
 };
 
+class Agent : public Actor {
+public:
+	Agent(int imageID, int startX, int startY, Direction startDirection, double size, unsigned int depth);
+	~Agent();
+	enum ProtestorState { LeaveField, StayField };
+	int getHitPoints() const { return m_hitPoints; }
+	void setHitpoints(int hitPoints) { m_hitPoints = hitPoints; }
+	int getTickCounter() const {return m_tickCounter;}
+	void resetCounter() { m_tickCounter = 0; }
+	void increCounter() { m_tickCounter++; }
+	int getTicksToWait() const { return m_ticksToWaitBetweenMoves; }
+	ProtestorState getProtestorState () const { return m_protestorState; }
+private:
+	int m_hitPoints;
+	int numSquaresToMoveInCurrentDirection;
+	ProtestorState m_protestorState;
+	int m_tickCounter;
+	int m_ticksToWaitBetweenMoves;
+	int m_cuurentLevel;
+	int getRandX();
+
+};
+
+class RegularProtestor : public Agent {
+public:
+	RegularProtestor();
+	~RegularProtestor();
+	virtual void doSomething();
+
+};
+
 class ActivatingObject : public Actor {
 public:
 	ActivatingObject(int imageID, int startX, int startY, Direction startDirection, double size, unsigned int depth);
