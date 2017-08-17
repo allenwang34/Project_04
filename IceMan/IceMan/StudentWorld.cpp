@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <random>
 #include <math.h>
+#include <queue>
+#include <tuple>
 using namespace std;
 
 GameWorld* createStudentWorld(string assetDir)
@@ -47,12 +49,21 @@ int StudentWorld::init()
 	for (int x = 0; x < oilFieldX; x++) { //create the oil field covered by ice
 		if (x < 30 || x > 33) {
 			for (int y = 0; y < oilFieldY; y++) {
-				Ice *newIce = new Ice(x, y);
-				m_oilField[x][y] = newIce;
+				if (y < 60) {
+					Ice *newIce = new Ice(x, y);
+					m_oilField[x][y] = newIce;
+				}
+				else {
+					Ice *newIce = new Ice(x, y);
+					m_oilField[x][y] = newIce;
+					newIce->setVisible(false);
+				}
 			}
+			
 		}
 		else  {
 			for (int y = 0; y < oilFieldY; y++) {
+
 				if (y >= 0 && y < 4) {
 					Ice *newIce = new Ice(x, y);
 					m_oilField[x][y] = newIce;
@@ -63,6 +74,12 @@ int StudentWorld::init()
 					newIce->setVisible(false);
 				}
 			}
+		}
+	}
+
+	for (int i = 0; i < oilFieldX; i++) {  //initialize the steps array
+		for (int j = 0; j < oilFieldY; j++) {
+			m_stepArr[i][j] = 99999;
 		}
 	}
 
@@ -284,16 +301,67 @@ bool StudentWorld::isBottomAnotherBoulder(const int x, const int y) {
 
 void StudentWorld::removeIce(const int x, const int y) {
 	for (int i = x; i < std::min(x+4, 64); i++) {
-		for (int j = y; j < std::min(y+4, 60); j++) {
+		for (int j = y; j < std::min(y+4, 64); j++) {
 			if (m_oilField[i][j] != nullptr) {
 				m_oilField[i][j]->setVisible(false);
+				generateStepArr();
 			}
 		}
 	}
-	
-	
 }
 
+bool StudentWorld::isLocationDiscovered(std::tuple<int, int> xyCoords, const std::vector< std::tuple<int, int>> locations) {
+	if (locations.empty())
+		return false;
+	for (unsigned int i = 0; i < locations.size(); i++) {
+		if (xyCoords == locations[i])
+			return true;
+	}
+	return false;
+}
+
+void StudentWorld::generateStepArr() {
+	for (int i = 0; i < oilFieldX; i++) {
+		for (int j = 0; j < oilFieldY; j++) {
+			if (!m_oilField[i][j]->isVisible()) {
+				int stepCounter = 0;
+				std::queue<tuple<int, int>> locationQueue;
+				std::vector<tuple<int, int>> visitedLocations;
+				locationQueue.push(std::tuple<int, int>(i, j));
+				while (!locationQueue.empty()) {
+					if (locationQueue.empty())
+						return;
+					else if (locationQueue.front() == std::tuple<int, int>(60, 60)) {
+						m_stepArr[i][j] = stepCounter;
+						return;
+					}
+					else {
+						int x = std::get<0>(locationQueue.front());
+						int y = std::get<1>(locationQueue.front());
+						locationQueue.pop();
+						if (x - 1 >= 0 && m_stepArr[x - 1][y] != 99999 && !isLocationDiscovered(std::tuple<int, int>(x - 1, y), visitedLocations)) {
+							visitedLocations.push_back(std::tuple<int, int>(x - 1, y));
+							locationQueue.push(std::tuple<int, int>(x - 1, y));
+						}
+						if (x + 1 <= 60 && m_stepArr[x + 1][y] != 99999 && !isLocationDiscovered(std::tuple<int, int>(x + 1, y), visitedLocations)) {
+							visitedLocations.push_back(std::tuple<int, int>(x + 1, y));
+							locationQueue.push(std::tuple<int, int>(x + 1, y));
+						}
+						if (y-1 >= 0 && m_stepArr[x][y-1] != 99999 && !isLocationDiscovered(std::tuple<int, int>(x, y-1), visitedLocations)) {
+							visitedLocations.push_back(std::tuple<int, int>(x, y-1));
+							locationQueue.push(std::tuple<int, int>(x, y-1));
+						}
+						if (y + 1 <= 60 && m_stepArr[x][y + 1] != 99999 && !isLocationDiscovered(std::tuple<int, int>(x, y + 1), visitedLocations)) {
+							visitedLocations.push_back(std::tuple<int, int>(x, y + 1));
+							locationQueue.push(std::tuple<int, int>(x, y + 1));
+						}
+					}
+				}
+			}
+
+		}
+	}
+}
 
 
 void StudentWorld::cleanUp() {
@@ -358,5 +426,53 @@ void StudentWorld::cleanDeadObjects() {
 		}
 		it++;
 	}
+
+}
+
+int StudentWorld::getSmallestValue(const int a,const int b,const int c,const int d) {
+	int minOfFirstSet = std::min(a, b);
+	int minOfSecondSet = std::min(c, d);
+	int smallestValue = std::min(minOfFirstSet, minOfSecondSet);
+	return smallestValue;
+}
+
+std::tuple<int, int> StudentWorld::getNextStep(const int xCoord,const int yCoord) {
+	int a, b, c, d;
+	if (xCoord - 1 >= 0) {
+		a = m_stepArr[xCoord - 1][yCoord];
+	}
+	else {
+		a = 99999;
+	}
+	if (xCoord + 1 <= 60) {
+		b = m_stepArr[xCoord + 1][yCoord];
+	}
+	else {
+		b = 99999;
+	}
+	if (yCoord - 1 >= 0) {
+		c = m_stepArr[xCoord][yCoord - 1];
+	}
+	else {
+		c = 99999;
+	}
+	if (yCoord + 1 <= 60) {
+		d = m_stepArr[xCoord][yCoord + 1];
+	}
+	else {
+		d = 99999;
+	}
+	int smallestValue = getSmallestValue(a, b, c, d);
+	if (m_stepArr[xCoord - 1][yCoord] == smallestValue) {
+		return std::tuple<int, int>(xCoord - 1, yCoord);
+	}
+	else if (m_stepArr[xCoord + 1][yCoord] == smallestValue) {
+		return std::tuple<int, int>(xCoord + 1, yCoord);
+	}
+	else if (m_stepArr[xCoord][yCoord - 1] == smallestValue) {
+		return std::tuple<int, int>(xCoord, yCoord - 1);
+	}
+	else
+		return std::tuple<int, int>(xCoord, yCoord + 1);
 
 }

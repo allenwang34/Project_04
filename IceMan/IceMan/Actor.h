@@ -29,7 +29,7 @@ private:
 
 };
 
-class Agent : public Actor {
+/*class Agent : public Actor {
 public:
 	Agent(int imageID, int startX, int startY, Direction startDirection, double size, unsigned int depth);
 	~Agent();
@@ -58,7 +58,7 @@ public:
 	~RegularProtestor();
 	virtual void doSomething();
 
-};
+};*/
 
 class ActivatingObject : public Actor {
 public:

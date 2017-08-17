@@ -14,7 +14,7 @@ Actor::Actor(int imageID, int startX, int startY, Direction startDirection, doub
 
 Actor::~Actor() {}
 
-Agent::Agent(int imageID, int startX, int startY, Direction startDirection, double size, unsigned int depth)
+/*Agent::Agent(int imageID, int startX, int startY, Direction startDirection, double size, unsigned int depth)
 	: Actor(imageID, startX, startY, startDirection, size, depth), m_hitPoints(0),
 	 m_protestorState(StayField), m_tickCounter(0) {
 	m_cuurentLevel = getWorld()->getCurrentLevel;
@@ -51,7 +51,7 @@ void RegularProtestor::doSomething() {
 	}
 }
 
-RegularProtestor::~RegularProtestor() {}
+RegularProtestor::~RegularProtestor() {}*/
 
 ActivatingObject::ActivatingObject(int imageID, int startX, int startY, Direction startDirection, double size, unsigned int depth) 
 	: Actor(imageID, startX,startY,startDirection,size,depth) {

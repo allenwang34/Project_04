@@ -7,7 +7,7 @@
 #include <string>
 #include <list>
 #include <vector>
-
+#include <tuple>
 
 
 // Students:  Add code to this file, StudentWorld.cpp, Actor.h, and Actor.cpp
@@ -37,10 +37,9 @@ public:
 	void sonarPickedUp() { m_isSonarKitInField = false; }
 
 private:
-
 	const int oilFieldX = 64;
-	const int oilFieldY = 60;
-	Ice* m_oilField[64][60];
+	const int oilFieldY = 64;
+	Ice* m_oilField[64][64];
 	Iceman* m_iceman;
 	int m_currentLevel;
 	int m_oilNum;
@@ -53,6 +52,11 @@ private:
 	void cleanDeadObjects();
 	int m_randXY[2];
 	bool m_isSonarKitInField;
+	int m_stepArr[64][64];
+	void generateStepArr();
+	bool isLocationDiscovered(const std::tuple<int,int> xyCoords, const std::vector< std::tuple<int, int>> locations);
+	std::tuple<int, int> getNextStep(const int xCoord,const int yCoord);
+	int getSmallestValue(const int a,const int b,const int c,const int d);
 	
 	
 };
