@@ -20,27 +20,47 @@ public:
 	bool getIsAnnoyed() const { return isAnnoyed; } 
 	void setAlive(bool aliveOrNot) { isAlive = aliveOrNot; }
 	bool getAlive() const { return isAlive; } 
-
+	bool isProtestor() const { return m_isProtestor; }
+	void setProestor() { m_isProtestor = true; }
+	virtual void KILLIT() {}
 
 private:
 	StudentWorld* m_studentWorld;
 	bool isAlive;
 	bool isAnnoyed;
-
+	bool m_isProtestor;
 };
 
-/*class Agent : public Actor {
+class Agent : public Actor {
 public:
 	Agent(int imageID, int startX, int startY, Direction startDirection, double size, unsigned int depth);
 	~Agent();
-	enum ProtestorState { LeaveField, StayField };
+	virtual void doSomething();
+	enum ProtestorState { LeaveField, StayField, Rest };
 	int getHitPoints() const { return m_hitPoints; }
 	void setHitpoints(int hitPoints) { m_hitPoints = hitPoints; }
-	int getTickCounter() const {return m_tickCounter;}
+	int getTickCounter() const { return m_tickCounter; }
 	void resetCounter() { m_tickCounter = 0; }
 	void increCounter() { m_tickCounter++; }
 	int getTicksToWait() const { return m_ticksToWaitBetweenMoves; }
-	ProtestorState getProtestorState () const { return m_protestorState; }
+	ProtestorState getProtestorState() const { return m_protestorState; }
+	void increShoutCounter() { m_shoutCounter++; }
+	void resetShoutCounter() { m_shoutCounter = 0; }
+	int getShoutCounter() const { return m_shoutCounter; }
+	void leaveField();
+	virtual void getAnnoyed();
+	void setNumSquare();
+	int getNumSquare() const { return numSquaresToMoveInCurrentDirection; }
+	void decreNumSqure() { numSquaresToMoveInCurrentDirection--; }
+	void decreHitPoints() { m_hitPoints--; }
+	void setTicksToWait();
+	void setState(ProtestorState State) { m_protestorState = State; }
+	void setRestTicks();
+	int getRestTicks() const { return m_restTicks; }
+	void resetRestCounter() { m_restCounter = 0; }
+	void increRestCounter() { m_restCounter++; }
+	int getRestCounter() const {return m_restCounter; }
+
 private:
 	int m_hitPoints;
 	int numSquaresToMoveInCurrentDirection;
@@ -49,16 +69,23 @@ private:
 	int m_ticksToWaitBetweenMoves;
 	int m_cuurentLevel;
 	int getRandX();
+	int m_shoutCounter;
+	int m_restTicks;
+	int m_restCounter;
 
+};
+
+class HardCoreProtestor : public Agent {
+public:
+	HardCoreProtestor();
+	~HardCoreProtestor();
 };
 
 class RegularProtestor : public Agent {
 public:
 	RegularProtestor();
 	~RegularProtestor();
-	virtual void doSomething();
-
-};*/
+};
 
 class ActivatingObject : public Actor {
 public:
@@ -119,6 +146,7 @@ public:
 	void increSonarKit() { m_sonarCharge++; }
 	void decreSonarKit() { m_sonarCharge--; }
 	void increWaterAmmo() { m_waterAmmo += 5; }
+	void decreHitPoints() { m_hitPoints-=2; }
 	
 private:
 	int m_hitPoints;

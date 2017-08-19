@@ -3,6 +3,7 @@
 #include "GameController.h"
 #include <algorithm>
 #include <random>
+#include<tuple>
 // Students:  Add code to this file (if you wish), Actor.h, StudentWorld.h, and StudentWorld.cpp
 
 Actor::Actor(int imageID, int startX, int startY, Direction startDirection, double size, unsigned int depth) 
@@ -10,17 +11,25 @@ Actor::Actor(int imageID, int startX, int startY, Direction startDirection, doub
 	setVisible(true);
 	setAlive(true);
 	setIsAnnoyed(false);
+	m_isProtestor = false;
 }
 
 Actor::~Actor() {}
 
-/*Agent::Agent(int imageID, int startX, int startY, Direction startDirection, double size, unsigned int depth)
+Agent::Agent(int imageID, int startX, int startY, Direction startDirection, double size, unsigned int depth)
 	: Actor(imageID, startX, startY, startDirection, size, depth), m_hitPoints(0),
-	 m_protestorState(StayField), m_tickCounter(0) {
-	m_cuurentLevel = getWorld()->getCurrentLevel;
+	 m_protestorState(StayField), m_tickCounter(0), m_shoutCounter(0), m_ticksToWaitBetweenMoves(0) {
+	//m_cuurentLevel = getWorld()->getCurrentLevel();
+	//int currentLevelVar = 3 - m_cuurentLevel / 4;
+	//m_ticksToWaitBetweenMoves = std::max(0, currentLevelVar);
+	numSquaresToMoveInCurrentDirection = getRandX();
+	setProestor();
+}
+
+void Agent::setTicksToWait() {
+	m_cuurentLevel = getWorld()->getCurrentLevel();
 	int currentLevelVar = 3 - m_cuurentLevel / 4;
 	m_ticksToWaitBetweenMoves = std::max(0, currentLevelVar);
-	numSquaresToMoveInCurrentDirection = getRandX();
 }
 
 int Agent::getRandX() {
@@ -32,6 +41,67 @@ int Agent::getRandX() {
 	return random_integer;
 }
 
+void Agent::setNumSquare() {
+	numSquaresToMoveInCurrentDirection = getRandX();
+}
+
+void Agent::setRestTicks() {
+	int curLevel = getWorld()->getCurrentLevel();
+	m_restTicks = std::max(50, 100 - curLevel * 10);
+}
+
+
+void Agent::getAnnoyed() {
+	m_hitPoints -= 2;
+	if (m_hitPoints >= 0) {
+		GameController::getInstance().playSound(SOUND_PROTESTER_ANNOYED);
+		setState(Rest);
+		setRestTicks();
+	}
+	else {
+		setState(LeaveField);
+	}
+	
+}
+
+void Agent::leaveField() {
+	int curX = getX();
+	int curY = getY();
+	if (curX == 60 && curY == 60) {
+		getWorld()->decreProtestorNum();
+		setVisible(false);
+		setAlive(false);
+		return;
+	}
+	//getWorld()->generateStepArr();
+	std::tuple<int, int> nextXY = getWorld()->getNextStep(curX, curY);
+	Direction curDir = getDirection();
+	int nextX = std::get<0>(nextXY);
+	int nextY = std::get<1>(nextXY);
+	if (curX - 1 == nextX) {
+		if (curDir != left)
+			setDirection(left);
+		moveTo(nextX, nextY);
+	}
+	else if (curX + 1 == nextX) {
+		if (curDir != right)
+			setDirection(right);
+		moveTo(nextX, nextY);
+	}
+	else if (curY - 1 == nextY) {
+		if (curDir != down)
+			setDirection(down);
+		moveTo(nextX, nextY);
+	}
+	else {
+		if (curDir != up)
+			setDirection(up);
+		moveTo(nextX, nextY);
+	}
+	//moveTo(curX, curY + 1);
+	
+}
+
 Agent::~Agent() {}
 
 RegularProtestor::RegularProtestor()
@@ -39,19 +109,158 @@ RegularProtestor::RegularProtestor()
 	setHitpoints(5);
 }
 
+HardCoreProtestor::HardCoreProtestor()
+	: Agent(IID_HARD_CORE_PROTESTER, 60, 60, left, 1, 0) {
+	setHitpoints(20);
+}
 
-void RegularProtestor::doSomething() {
+HardCoreProtestor::~HardCoreProtestor() {}
+
+
+void Agent::doSomething() {
 	if (!getAlive())
 		return;
-	if (getTicksToWait!=0 && getTickCounter() < getTicksToWait()) {
-		increCounter();
-	}
-	if ( getProtestorState() == LeaveField) {
+	ProtestorState curState = getProtestorState();
+	switch (curState)
+	{
+	case Rest:
+		if (getRestCounter() < getRestTicks()) {
+			increRestCounter();
+			return;
+		}
+		setState(StayField);
+		GameController::getInstance().playSound(SOUND_PROTESTER_GIVE_UP);
+		break;
+	case LeaveField:
+		if (getTicksToWait() != 0 && getTickCounter() < getTicksToWait()) {
+			increCounter();
+			return;
+		}
+		leaveField();
+		resetCounter();
+		return;
+		break;
+	case StayField:
+		if (getTicksToWait() != 0 && getTickCounter() < getTicksToWait()) {
+			increCounter();
+			return;
+			break;
+		}
+		int curX = getX();
+		int curY = getY();
+		int icemanX = getWorld()->getPlayer()->getX();
+		int icemanY = getWorld()->getPlayer()->getY();
+		Direction curDir = getDirection();
+		if (getWorld()->isIcemanNearBy(curX, curY, 4)) {
+			if (curX - icemanX <= curY - icemanY && curX <= icemanX && curDir == right && getShoutCounter() > 15) {
+				GameController::getInstance().playSound(SOUND_PROTESTER_YELL);
+				getWorld()->getPlayer()->decreHitPoints();
+				resetShoutCounter();
+				return;
+			}
+			else if (curX - icemanX <= curY - icemanY && curX >= icemanX && curDir == left && getShoutCounter() > 15) {
+				GameController::getInstance().playSound(SOUND_PROTESTER_YELL);
+				getWorld()->getPlayer()->decreHitPoints();
+				resetShoutCounter();
+				return;
+			}
+			else if (curX - icemanX >= curY - icemanY && curY >= icemanY && curDir == down && getShoutCounter() > 15) {
+				GameController::getInstance().playSound(SOUND_PROTESTER_YELL);
+				getWorld()->getPlayer()->decreHitPoints();
+				resetShoutCounter();
+				return;
+			}
+			else {
+				GameController::getInstance().playSound(SOUND_PROTESTER_YELL);
+				getWorld()->getPlayer()->decreHitPoints();
+				resetShoutCounter();
+				return;
+			}
+		}
+		increShoutCounter();
+		if (curX == icemanX && !getWorld()->isIceInLineY(icemanY, curY, curX)) {
+			if (icemanY > curY) {
+				setDirection(up);
+				moveTo(curX, curY + 1);
+				return;
+			}
+			else {
+				setDirection(down);
+				moveTo(curX, curY - 1);
+				return;
+			}
+		}
+		else if (curY == icemanY && !getWorld()->isIceInLineX(icemanX, curX, curY)) {
+			if (icemanX > curX) {
+				setDirection(right);
+				moveTo(curX + 1, curY);
+				return;
+			}
+			else {
+				setDirection(left);
+				moveTo(curX - 1, curY);
+				return;
+			}
+		}
 
+		if (getNumSquare() <= 0) {
+			setNumSquare();
+		}
+
+		switch (getDirection()) {
+		case right:
+			if (curX + 1 <= 60) {
+				moveTo(curX + 1, curY);
+				decreNumSqure();
+				break;
+			}
+			else {
+				moveTo(curX, curY);
+				decreNumSqure();
+				break;
+			}
+		case left:
+			if (curX - 1 >= 0) {
+				moveTo(curX - 1, curY);
+				decreNumSqure();
+				break;
+			}
+			else {
+				moveTo(curX, curY);
+				decreNumSqure();
+				break;
+			}
+		case up:
+			if (curY + 1 <= 60) {
+				moveTo(curX, curY + 1);
+				decreNumSqure();
+				break;
+			}
+			else {
+				moveTo(curX, curY);
+				decreNumSqure();
+				break;
+			}
+		case down:
+			if (curY - 1 >= 0) {
+				moveTo(curX, curY - 1);
+				decreNumSqure();
+				break;
+			}
+			else {
+				moveTo(curX, curY);
+				decreNumSqure();
+				break;
+			}
+		default:
+			break;
+		}
+
+		resetCounter();
 	}
 }
 
-RegularProtestor::~RegularProtestor() {}*/
+RegularProtestor::~RegularProtestor() {}
 
 ActivatingObject::ActivatingObject(int imageID, int startX, int startY, Direction startDirection, double size, unsigned int depth) 
 	: Actor(imageID, startX,startY,startDirection,size,depth) {
@@ -229,7 +438,8 @@ void Iceman::doSomething() {
 
 	if (!getAlive())
 		return;
-
+	if (m_hitPoints < 0)
+		setAlive(false);
 	int i;
 	if (getWorld()->getKey(i)) {
 		switch (i)
@@ -447,7 +657,8 @@ void Squirt::doSomething() {
 	int squirtY = getY();
 	if (getWorld()->isCoveredByIce(squirtX, squirtY) || getWorld()->isBoulderAhead(squirtX, squirtY))
 		setAlive(false);
-
+	getWorld()->isObjectAhead(squirtX, squirtY);
+		
 	if (m_distTraveled <= 4) {
 		switch (getDirection()) {
 

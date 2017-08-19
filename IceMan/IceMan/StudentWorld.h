@@ -35,6 +35,17 @@ public:
 	int getCurrentLevel() const { return m_currentLevel; }
 	void revealGoodiesAround(int playerX, int playerY);
 	void sonarPickedUp() { m_isSonarKitInField = false; }
+	std::tuple<int, int> getNextStep(const int xCoord, const int yCoord);
+	void generateStepArr();
+	bool isIceInLineX(int IcemanX, int ProtesterX, int Y);
+	bool isIceInLineY(int IcemanY, int ProtesterY, int X);
+	void setProtestorLeave();
+	bool isObjectAhead(const int x, const int y);
+	void increProtestorNum() { m_protestorNum++; }
+	void decreProtestorNum() { m_protestorNum--; }
+	void resetProtestorCounter() { m_protestorCounter = 0; }
+	
+	
 
 private:
 	const int oilFieldX = 64;
@@ -53,11 +64,13 @@ private:
 	int m_randXY[2];
 	bool m_isSonarKitInField;
 	int m_stepArr[64][64];
-	void generateStepArr();
 	bool isLocationDiscovered(const std::tuple<int,int> xyCoords, const std::vector< std::tuple<int, int>> locations);
-	std::tuple<int, int> getNextStep(const int xCoord,const int yCoord);
 	int getSmallestValue(const int a,const int b,const int c,const int d);
-	
+	int m_protestorNum;
+	int maxProtestorNum;
+	int m_protestorCounter;
+	int m_protestorTick;
+	int m_hardCorePossiblity;
 	
 };
 

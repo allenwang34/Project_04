@@ -44,7 +44,12 @@ int StudentWorld::init()
 	m_goldNum = std::max(5 - m_currentLevel / 2, 2);
 	m_GoodiePossibility = (m_currentLevel * 25 + 300);
 	m_isSonarKitInField = false;
-
+	maxProtestorNum =std::min(15, 2 + m_currentLevel * 2);
+	m_protestorTick =std::max(25, 200 - m_currentLevel);
+	m_protestorNum = 0;
+	m_protestorCounter = 0;
+	m_hardCorePossiblity = std::min(90, m_currentLevel * 10 + 30);
+	
 
 	for (int x = 0; x < oilFieldX; x++) { //create the oil field covered by ice
 		if (x < 30 || x > 33) {
@@ -78,8 +83,32 @@ int StudentWorld::init()
 	}
 
 	for (int i = 0; i < oilFieldX; i++) {  //initialize the steps array
-		for (int j = 0; j < oilFieldY; j++) {
+		/*for (int j = 0; j < oilFieldY; j++) {
 			m_stepArr[i][j] = 99999;
+		}*/
+		for (int x = 0; x < oilFieldX; x++) {
+			if (x < 30 || x > 33) {
+				for (int y = 0; y < oilFieldY; y++) {
+					if (y < 60) {
+						m_stepArr[x][y] = 99999;//wall
+					}
+					else {
+						m_stepArr[x][y] = 99998;//walkway
+					}
+				}
+
+			}
+			else {
+				for (int y = 0; y < oilFieldY; y++) {
+
+					if (y >= 0 && y < 4) {
+						m_stepArr[x][y] = 99999;
+					}
+					else {
+						m_stepArr[x][y] = 99998;
+					}
+				}
+			}
 		}
 	}
 
@@ -111,6 +140,12 @@ int StudentWorld::init()
 		newGold->setWorld(this);
 		m_gameObjectList.push_back(newGold);
 	}
+
+	RegularProtestor* m_regularProt = new RegularProtestor;
+	m_regularProt->setWorld(this);
+	m_regularProt->setTicksToWait();
+	m_gameObjectList.push_back(m_regularProt);
+	m_protestorNum++;
 
 
 	setGameStatText("Level: " + std::to_string(getLevel()) + " Lives: " + std::to_string(getLives()) + " Hlth: " 
@@ -145,6 +180,28 @@ int StudentWorld::move()
 		+ std::to_string(m_iceman->GetSonar()) + " Score: " + std::to_string(getScore()));
 
 
+	if (m_protestorNum < maxProtestorNum && m_protestorCounter && m_protestorCounter >=  m_protestorTick && m_protestorNum < maxProtestorNum) {
+		if (getRandNum(1, m_hardCorePossiblity) == m_hardCorePossiblity) {
+			HardCoreProtestor* m_hardProt = new HardCoreProtestor;
+			m_hardProt->setWorld(this);
+			m_hardProt->setTicksToWait();
+			m_gameObjectList.push_back(m_hardProt);
+			m_protestorNum++;
+			resetProtestorCounter();
+		}
+		else {
+			RegularProtestor* m_regularProt = new RegularProtestor;
+			m_regularProt->setWorld(this);
+			m_regularProt->setTicksToWait();
+			m_gameObjectList.push_back(m_regularProt);
+			m_protestorNum++;
+			resetProtestorCounter();
+		}
+	}
+	else {
+		m_protestorCounter++;
+	}
+
 	if (getRandNum(1, m_GoodiePossibility) == m_GoodiePossibility) {
 		if (getRandNum(1, 5) != 5) {
 			setRandXY(0,63,0,59);
@@ -171,8 +228,20 @@ int StudentWorld::move()
 		it++;
 	}
 
+	
+
 	cleanDeadObjects(); //clean all the dead objects 
 	return GWSTATUS_CONTINUE_GAME;
+}
+
+
+void StudentWorld::setProtestorLeave() {
+	list<Actor*>::iterator it = m_gameObjectList.begin(); //ask every object in the list, if not dead, do something. 
+	while (it != m_gameObjectList.end()) {
+		if ((*it != nullptr))
+			(*it)->getAnnoyed();
+		it++;
+	}
 }
 
 void StudentWorld::revealGoodiesAround(int playerX, int playerY) {
@@ -239,7 +308,7 @@ void StudentWorld::dropGold(int startX, int startY) {
 void StudentWorld::shootWaterSquirt(int bornX, int bornY) {
 	int SquirtBornX = bornX;
 	int SquirtBornY = bornY;
-	if (!isCoveredByIce(SquirtBornX, SquirtBornY) && !isBoulderAhead(SquirtBornX, SquirtBornY)) {
+	if (!isCoveredByIce(SquirtBornX, SquirtBornY) && !isBoulderAhead(SquirtBornX, SquirtBornY) && bornX >= 3 && bornX <= 60 && bornY >= 3 && bornY <= 60) {
 		Squirt *newSquirt = new Squirt(SquirtBornX, SquirtBornY, m_iceman->getDirection());
 		newSquirt->setWorld(this);
 		m_gameObjectList.push_back(newSquirt);
@@ -263,6 +332,32 @@ bool StudentWorld::isCoveredByIce(const int x,const int y) {
 		for (int j = y; j < std::min(y + 4, 60); j++) {
 			if (m_oilField[i][j] != nullptr && m_oilField[i][j]->isVisible() != false)
 				return true;
+		}
+	}
+	return false;
+}
+
+bool StudentWorld::isIceInLineX(int IcemanX, int ProtesterX, int Y) {
+	if (Y >= 60)
+		return false;
+	for (int x = ProtesterX; x < IcemanX; x++) {
+		for (int i = x; i < std::min(x + 4, 64); i++) {
+			for (int j = Y; j < std::min(Y + 4, 60); j++) {
+				if (m_oilField[i][j] != nullptr && m_oilField[i][j]->isVisible() != false)
+					return true;
+			}
+		}
+	}
+	return false;
+}
+
+bool StudentWorld::isIceInLineY(int IcemanY, int ProtesterY, int X) {
+	for (int y = ProtesterY; y < IcemanY; y++) {
+		for (int i = X; i < std::min(X + 4, 64); i++) {
+			for (int j = y; j < std::min(y + 4, 60); j++) {
+				if (m_oilField[i][j] != nullptr && m_oilField[i][j]->isVisible() != false)
+					return true;
+			}
 		}
 	}
 	return false;
@@ -304,6 +399,7 @@ void StudentWorld::removeIce(const int x, const int y) {
 		for (int j = y; j < std::min(y+4, 64); j++) {
 			if (m_oilField[i][j] != nullptr) {
 				m_oilField[i][j]->setVisible(false);
+				m_stepArr[i][j] = 99998;
 				generateStepArr();
 			}
 		}
@@ -320,20 +416,28 @@ bool StudentWorld::isLocationDiscovered(std::tuple<int, int> xyCoords, const std
 	return false;
 }
 
+
+
+
 void StudentWorld::generateStepArr() {
 	for (int i = 0; i < oilFieldX; i++) {
 		for (int j = 0; j < oilFieldY; j++) {
-			if (!m_oilField[i][j]->isVisible()) {
-				int stepCounter = 0;
+			if (m_oilField[i][j]->isVisible()==false) { //!m_oilField[i][j]->isVisible()
+
+				m_stepArr[i][j] = 60 - i + 60 - j;
+				//Below is my Maze Searching algorithm, but it seems don't work well.
+				/*int stepCounter = 0;
 				std::queue<tuple<int, int>> locationQueue;
 				std::vector<tuple<int, int>> visitedLocations;
 				locationQueue.push(std::tuple<int, int>(i, j));
-				while (!locationQueue.empty()) {
-					if (locationQueue.empty())
-						return;
-					else if (locationQueue.front() == std::tuple<int, int>(60, 60)) {
+				//bool notBreak = true;
+				while (!locationQueue.empty()) { //!locationQueue.empty()
+					//if (locationQueue.empty())
+						//return;
+					if (locationQueue.front() == std::tuple<int, int>(60, 60)) {
 						m_stepArr[i][j] = stepCounter;
-						return;
+						break;
+						//notBreak = false;
 					}
 					else {
 						int x = std::get<0>(locationQueue.front());
@@ -355,8 +459,9 @@ void StudentWorld::generateStepArr() {
 							visitedLocations.push_back(std::tuple<int, int>(x, y + 1));
 							locationQueue.push(std::tuple<int, int>(x, y + 1));
 						}
+						stepCounter++;
 					}
-				}
+				}*/
 			}
 
 		}
@@ -416,6 +521,23 @@ bool StudentWorld::isBoulderAhead(const int x, const int y) {
 
 }
 
+bool StudentWorld::isObjectAhead(const int x, const int y) {
+	list<Actor*>::iterator it = m_gameObjectList.begin();
+	while (it != m_gameObjectList.end()) {
+		if (*it != nullptr) {
+			int objX = (*it)->getX();
+			int objY = (*it)->getY();
+			if (sqrt(pow((x - objX), 2) + pow((y - objY), 2)) <= 3) {
+				(*it)->getAnnoyed();
+				return true;
+			}
+		}
+		it++;
+	}
+	return false;
+
+}
+
 void StudentWorld::cleanDeadObjects() {
 	list<Actor*>::iterator it = m_gameObjectList.begin();
 	while (it != m_gameObjectList.end()) {
@@ -438,14 +560,20 @@ int StudentWorld::getSmallestValue(const int a,const int b,const int c,const int
 
 std::tuple<int, int> StudentWorld::getNextStep(const int xCoord,const int yCoord) {
 	int a, b, c, d;
-	if (xCoord - 1 >= 0) {
+	if (xCoord - 1 >= 0 ) {
 		a = m_stepArr[xCoord - 1][yCoord];
 	}
 	else {
 		a = 99999;
 	}
-	if (xCoord + 1 <= 60) {
+	if (xCoord + 1 <= 60 && m_stepArr[xCoord+4][yCoord] !=99999 ) {
 		b = m_stepArr[xCoord + 1][yCoord];
+	}
+	else if (m_stepArr[xCoord + 4][yCoord] == 99999) {
+		for (int i = 1; i <= 4; i++) {
+			m_stepArr[xCoord + i][yCoord] = 99999;
+			b = 99999;
+		}
 	}
 	else {
 		b = 99999;
@@ -463,6 +591,8 @@ std::tuple<int, int> StudentWorld::getNextStep(const int xCoord,const int yCoord
 		d = 99999;
 	}
 	int smallestValue = getSmallestValue(a, b, c, d);
+	
+	
 	if (m_stepArr[xCoord - 1][yCoord] == smallestValue) {
 		return std::tuple<int, int>(xCoord - 1, yCoord);
 	}
@@ -472,7 +602,9 @@ std::tuple<int, int> StudentWorld::getNextStep(const int xCoord,const int yCoord
 	else if (m_stepArr[xCoord][yCoord - 1] == smallestValue) {
 		return std::tuple<int, int>(xCoord, yCoord - 1);
 	}
-	else
+	else if (m_stepArr[xCoord][yCoord + 1] == smallestValue)
 		return std::tuple<int, int>(xCoord, yCoord + 1);
+	else
+		return std::tuple<int, int>(xCoord, yCoord); 
 
 }
